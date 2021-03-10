@@ -1,3 +1,4 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/sclafus/flaskylearn/badge?s=28707972a0d84d5d62a586329595199834fb0240)](https://www.codefactor.io/repository/github/sclafus/flaskylearn)
 # Your choice for hosting your course, for free!
 
 FlaskyLearn is a web application built with Python 3 and Flask. 
