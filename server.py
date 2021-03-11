@@ -1,5 +1,6 @@
 from flask import Flask, redirect, url_for, render_template, request, session
 from os import environ
+from datetime import timedelta
 # from passlib.hash import sha256_crypt
 # from dotenv import load_dotenv
 
@@ -26,6 +27,15 @@ def login():
       #TODO not optimal, store hash of hash of email and password
       email = request.form["email"]
       password = request.form["password"]
+
+      #TODO explain this
+      try:
+        stayLogged = request.form["stayLogged"]
+        if stayLogged:
+          app.permanent_session_lifetime = timedelta(days=1000)
+
+      except:
+        pass
 
       # TODO access database and check if the user data is correct
       emailFromDB = email
