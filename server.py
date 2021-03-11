@@ -9,6 +9,7 @@ app = Flask(__name__)
 # TODO set session duration
 # app.secret_key = sha256_crypt.hash(environ['SECRET_KEY']) 
 app.secret_key = "development"
+debug = False
 
 @app.route("/")
 def home():
@@ -52,4 +53,7 @@ def register():
   return render_template("register.html")
 
 if __name__ == '__main__':
-  app.run(threaded=True)
+  if debug:
+    app.run(debug=True, threaded=True)
+  else:
+    app.run(threaded=True)
