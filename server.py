@@ -9,7 +9,7 @@ app = Flask(__name__)
 # TODO set session duration
 # app.secret_key = sha256_crypt.hash(environ['SECRET_KEY']) 
 app.secret_key = "development"
-debug = False
+debug = True
 
 @app.route("/")
 def home():
@@ -35,7 +35,7 @@ def login():
         if stayLogged:
           app.permanent_session_lifetime = timedelta(days=1000)
 
-      except:
+      except KeyError:
         pass
 
       # TODO access database and check if the user data is correct
