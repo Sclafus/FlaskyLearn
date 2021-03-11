@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, request, session
 from os import environ
 from datetime import timedelta
-# from passlib.hash import sha256_crypt
+from passlib.hash import sha256_crypt
 # from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -9,7 +9,6 @@ app = Flask(__name__)
 # TODO set session duration
 # app.secret_key = sha256_crypt.hash(environ['SECRET_KEY']) 
 app.secret_key = "development"
-debug = True
 
 @app.route("/")
 def home():
@@ -25,26 +24,27 @@ def login():
   Handles POST requests to login users
   '''
   if request.method == "POST":
-      #TODO not optimal, store hash of hash of email and password
-      email = request.form["email"]
-      password = request.form["password"]
+    #using hash of email and password for improved security
+    email = sha256_crypt.hash(request.form["email"])
+    password = sha256_crypt.hash(request.form["password"])
 
-      #TODO explain this
-      try:
-        stayLogged = request.form["stayLogged"]
-        if stayLogged:
-          app.permanent_session_lifetime = timedelta(days=1000)
+    #handling unchecked "Remember me" option
+    try:
+      stayLogged = request.form["stayLogged"]
+      if stayLogged:
+        app.permanent_session_lifetime = timedelta(days=1000)
+    
+    except KeyError:
+      pass
 
-      except KeyError:
-        pass
+    # TODO access database and check if the user data is correct
+    emailFromDB = email
+    passwordFromDB = password
 
-      # TODO access database and check if the user data is correct
-      emailFromDB = email
-      passwordFromDB = password
-
-      session["email"] = emailFromDB 
-      session["password"] = passwordFromDB
-      return redirect(url_for("home"))
+    #storing hash of hash of password and email in session for improved security
+    session["email"] = emailFromDB 
+    session["password"] = passwordFromDB
+    return redirect(url_for("home"))
 
   return render_template("login.html")
 
@@ -53,7 +53,4 @@ def register():
   return render_template("register.html")
 
 if __name__ == '__main__':
-  if debug:
-    app.run(debug=True, threaded=True)
-  else:
-    app.run(threaded=True)
+  app.run(threaded=True)
