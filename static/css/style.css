@@ -1,4 +1,12 @@
 .navbar-logo {
   size: 15px;
 }
+
+body {
+  background-color: #2b2b2b;
+}
+
+label {
+  color: #d3d3d3;
+}
 /*# sourceMappingURL=style.css.map */
