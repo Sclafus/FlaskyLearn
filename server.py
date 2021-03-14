@@ -1,13 +1,40 @@
 from flask import Flask, redirect, url_for, render_template, request, session
-from os import environ
 from datetime import timedelta
 from passlib.hash import sha256_crypt
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
+import mariadb
+import os
+
+#loading .env file
+load_dotenv()
+secretKey = os.getenv("SECRET_KEY")
+dbUser = os.getenv("DB_USER")
+dbPassword = os.getenv("DB_PASSWORD")
+dbHost = os.getenv("DB_HOST")
+dbPort = int(os.getenv("DB_PORT"))
+dbSchema = os.getenv("DB_SCHEMA")
+
 
 app = Flask(__name__)
-# TODO .env secretkey
-# app.secret_key = sha256_crypt.hash(environ['SECRET_KEY']) 
-app.secret_key = "development"
+app.secret_key = sha256_crypt.hash(secretKey)
+
+def dbConnect():
+  '''
+  Returns connection to the local database object
+  '''
+  try:
+    conn = mariadb.connect(
+      user = dbUser,
+      password = dbPassword,
+      host = dbHost,
+      port = dbPort,
+      database = dbSchema
+    )
+    return (conn.cursor())
+
+  except mariadb.Error as e:
+    print(f"Error connecting to MariaDB Platform: {e}")
+    raise Exception
 
 @app.route("/")
 def home():
@@ -17,9 +44,9 @@ def home():
   try:
     user = session["email"]
     return render_template("index.html", name=user)
+
   except KeyError:
     pass
-
   return render_template("index.html")
 
 @app.route("/login/", methods=["POST", "GET"])
