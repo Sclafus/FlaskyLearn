@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from werkzeug.utils import secure_filename
 from datetime import timedelta
-from passlib.hash import sha256_crypt
+from Crypto.Hash import SHA256
 from dotenv import load_dotenv
 import mariadb
 import os
@@ -10,6 +10,7 @@ import re
 # loading .env file
 load_dotenv()
 secretKey = os.getenv("SECRET_KEY")
+
 
 # .env allocation
 dbUser = os.getenv("DB_USER")
@@ -22,9 +23,15 @@ videoFormats = os.getenv("VIDEO_FORMATS").split(', ')
 
 # Flask inizialization
 app = Flask(__name__)
-app.secret_key = sha256_crypt.hash(secretKey)
+app.secret_key = SHA256.new(secretKey.encode()).hexdigest()
+print(f"APP SECRET KEY {app.secret_key} - {len(app.secret_key)}")
 app.config['UPLOAD_FOLDER'] = uploadFolder
 
+def doubleHash(input: str) -> str:
+    '''
+    return the double hash of the input string
+    '''
+    return SHA256.new((SHA256.new(input.encode()).hexdigest()).encode()).hexdigest()
 
 def dbConnect():
     '''
@@ -61,12 +68,6 @@ def home():
     '''
     Renders the homepage template
     '''
-    # try:
-    #   user = session["email"]
-
-    # except KeyError:
-    #   #TODO ew
-    #   pass
     return render_template("index.html")
 
 
@@ -94,10 +95,10 @@ def login():
         db = dbConnect()
         dbCurr = db.cursor()
 
-        hhmail = sha256_crypt.hash(sha256_crypt.hash(email))
-        hhpass = sha256_crypt.hash(sha256_crypt.hash(password))
-
         # The database stores hash of hash of both email and password
+        hhmail = doubleHash(email)
+        hhpass = doubleHash(password)
+        
         dbCurr.execute(
             "SELECT Email, Password FROM Students WHERE Email=?", (hhmail,))
 
@@ -135,9 +136,8 @@ def register():
         password = request.form["password"]
 
         # double hash password and mail
-        hhmail = sha256_crypt.hash(sha256_crypt.hash(email))
-        hhpass = sha256_crypt.hash(sha256_crypt.hash(password))
-        print(f"H(H(mailRegister)): {hhmail}")
+        hhmail = doubleHash(email)
+        hhpass = doubleHash(password)
 
         # Connection to db
         db = dbConnect()
@@ -145,6 +145,7 @@ def register():
 
         dbCurr.execute("SELECT Email FROM Students WHERE Email=?", (hhmail, ))
 
+        alreadyRegistered = False
         for _ in dbCurr:
             alreadyRegistered = True
 
