@@ -9,9 +9,15 @@ web app for all the non technical people around the world.
 
 ```.env
 SECRET_KEY="development"
+
+# Database stuff
 DB_USER="root"
 DB_PASSWORD="admin"
 DB_HOST="localhost"
-DB_PORT=3306 
+DB_PORT=3306
 DB_SCHEMA="flaskylearn"
+
+#File stuff
+UPLOAD_FOLDER="./static/videos"
+VIDEO_FORMATS = "webm, mkv, flv, avi, mov, wmv, mp4, m4v, 3gp"
 ```
