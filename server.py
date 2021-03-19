@@ -24,7 +24,6 @@ videoFormats = os.getenv("VIDEO_FORMATS").split(', ')
 # Flask inizialization
 app = Flask(__name__)
 app.secret_key = SHA256.new(secretKey.encode()).hexdigest()
-print(f"APP SECRET KEY {app.secret_key} - {len(app.secret_key)}")
 app.config['UPLOAD_FOLDER'] = uploadFolder
 
 def doubleHash(input: str) -> str:
@@ -102,18 +101,16 @@ def login():
         dbCurr.execute(
             "SELECT Email, Password FROM Students WHERE Email=?", (hhmail,))
 
-        # print(f"H(H(mail)): {hhmail}")
-
         # TODO ew fix this
         for (mail, passwd) in dbCurr:
             if mail == hhmail:
                 if passwd == hhpass:
                     session["email"] = mail
-                    print("epico")
+                    print("Login Successful")
                 else:
-                    print("non troppo epico, ma quasi")
+                    print("Wrong Password")
             else:
-                print("Ao scemo registrate")
+                print("Wrong Email, please register I guess?")
 
         db.close()
         # storing hash of hash of password and email in session for improved security || To implement
@@ -137,8 +134,6 @@ def register():
 
         # double hash password and mail
         hhmail = doubleHash(email)
-        hhpass = doubleHash(password)
-
         # Connection to db
         db = dbConnect()
         dbCurr = db.cursor()
@@ -153,7 +148,7 @@ def register():
         try:
             if not alreadyRegistered:
                 dbCurr.execute(
-                    "INSERT INTO Students (Email, Password, Name, Surname) VALUES (?, ?, ?, ?)", (hhmail, hhpass, name, surname))
+                    "INSERT INTO Students (Email, Password, Name, Surname) VALUES (?, ?, ?, ?)", (hhmail, doubleHash(password), name, doubleHash(surname)))
         except mariadb.Error as e:
             db.close()
             print(f"👿Something happended {e}")
