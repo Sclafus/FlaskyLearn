@@ -10,7 +10,16 @@ label {
   color: #d3d3d3;
 }
 
+h1 {
+  margin: 0 1vw;
+  color: #d3d3d3;
+}
+
 form {
-  margin: 0 1vw 0 1vw;
+  margin: 0 1vw;
+}
+
+form input {
+  color: #d3d3d3;
 }
 /*# sourceMappingURL=style.css.map */

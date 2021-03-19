@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+<h1>Upload New Video</h1>
 <form method="post" enctype=multipart/form-data>
   <div class="form-group">
-    <label class="custom-file">
-      <input type="file" name="video" id="video" placeholder="Select Video" class="custom-file-input" aria-describedby="new file">
-      <span class="custom-file-control"></span>
-    </label>
+    <input type="file" class="form-control-file" name="video" id="video" placeholder="Select File" aria-describedby="New File">
   </div>
+
   <button type="submit" class="btn btn-primary">Upload</button>
 </form>
 {% endblock %}
