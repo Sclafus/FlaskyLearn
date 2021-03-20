@@ -26,11 +26,13 @@ app = Flask(__name__)
 app.secret_key = SHA256.new(secretKey.encode()).hexdigest()
 app.config['UPLOAD_FOLDER'] = uploadFolder
 
+
 def doubleHash(input: str) -> str:
     '''
     return the double hash of the input string
     '''
     return SHA256.new((SHA256.new(input.encode()).hexdigest()).encode()).hexdigest()
+
 
 def dbConnect():
     '''
@@ -67,6 +69,12 @@ def home():
     '''
     Renders the homepage template
     '''
+    try:
+        print(f"EMAIL: {session['email']}")
+    except KeyError:
+        print("no session data")
+        
+
     return render_template("index.html")
 
 
@@ -97,23 +105,23 @@ def login():
         # The database stores hash of hash of both email and password
         hhmail = doubleHash(email)
         hhpass = doubleHash(password)
-        
-        dbCurr.execute(
-            "SELECT Email, Password FROM Students WHERE Email=?", (hhmail,))
+        flag = False
 
-        # TODO ew fix this
-        for (mail, passwd) in dbCurr:
-            if mail == hhmail:
-                if passwd == hhpass:
-                    session["email"] = mail
-                    print("Login Successful")
-                else:
-                    print("Wrong Password")
-            else:
-                print("Wrong Email, please register I guess?")
+        for table in ["Students", "Contributors"]:
+            
+            if not flag:
+                dbCurr.execute(
+                    f"SELECT Email, Password FROM {table} WHERE Email=?", (hhmail,))
+
+                for (email, passwd) in dbCurr:
+                    flag = True
+                    if passwd == hhpass:
+                        session["email"] = email
+                        print(f"User with email {email} logged in successfully")
+                    else:
+                        print(f"Wrong Password for email {email}")
 
         db.close()
-        # storing hash of hash of password and email in session for improved security || To implement
         return redirect(url_for("home"))
 
     return render_template("login.html")
@@ -122,7 +130,7 @@ def login():
 @app.route("/register/", methods=["POST", "GET"])
 def register():
     '''
-    TODO
+    Register to the Student table
     '''
 
     if request.method == "POST":
@@ -173,31 +181,48 @@ def logout():
 @app.route("/dashboard/", methods=['POST', 'GET'])
 def dashboard():
 
-    # TODO check permission!
-    # TODO fix file select
+    db = dbConnect()
+    dbCurr = db.cursor()
+    dbCurr.execute("SELECT Email FROM Contributors WHERE Email=?", (doubleHash(session['email']), ))
+
+    authorized = False
+    for _ in dbCurr:
+        authorized = True
+
     # POST request in this page uploads a new video
-    if request.method == 'POST':
-        #
-        if 'video' not in request.files:
-            print('No file part')
-            return redirect(request.url)
-        file = request.files['video']
+    if authorized:
 
-        # handles unselected file
-        if file.filename == '':
-            print('No selected file')
-            return redirect(request.url)
+        if (request.method == 'POST'):
 
-    # TODO add progress bar
-        if file and allowedFile(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        else:
-            print("Non accepted extension")
+            if 'video' not in request.files:
+                print('No file part')
+                return redirect(request.url)
+            file = request.files['video']
 
-    # TODO add new video to DB
-    return render_template("dashboard.html")
+            # handles unselected file
+            if file.filename == '':
+                print('No selected file')
+                return redirect(request.url)
 
+            # TODO add progress bar
+            if file and allowedFile(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            else:
+                print("Non accepted extension")
+
+            # TODO add new video to DB
+    
+        return render_template("dashboard.html")
+    else:
+        return redirect(url_for("forbidden"))
+
+@app.route("/forbidden/")
+def forbidden():
+    '''
+    Renders the forbidden template
+    '''
+    return render_template("forbidden.html")
 
 if __name__ == '__main__':
     app.run(threaded=True)
