@@ -237,4 +237,4 @@ def forbidden():
     return render_template("forbidden.html")
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True)
+    app.run(threaded=True)
