@@ -194,15 +194,19 @@ def dashboard():
     if authorized:
 
         if (request.method == 'POST'):
+            # TODO check the name of the file for _
 
+            # File checks
             if 'video' not in request.files:
                 print('No file part')
+                db.close()
                 return redirect(request.url)
             file = request.files['video']
 
             # handles unselected file
             if file.filename == '':
                 print('No selected file')
+                db.close()
                 return redirect(request.url)
 
             # TODO add progress bar
@@ -211,8 +215,15 @@ def dashboard():
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             else:
                 print("Non accepted extension")
+                db.close()
+    
+            description = request.form['description']
+            path = f"videos/{filename}"
 
-            # TODO add new video to DB
+            dbCurr.execute("INSERT INTO Videos (Description, Path) VALUES (?, ?)", (description, path))
+            db.commit()
+            db.close()
+            
     
         return render_template("dashboard.html")
     else:
@@ -226,4 +237,4 @@ def forbidden():
     return render_template("forbidden.html")
 
 if __name__ == '__main__':
-    app.run(threaded=True)
+    app.run(debug=True, threaded=True)
