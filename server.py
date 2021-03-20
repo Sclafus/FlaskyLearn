@@ -111,12 +111,13 @@ def login():
             
             if not flag:
                 dbCurr.execute(
-                    f"SELECT Email, Password FROM {table} WHERE Email=?", (hhmail,))
+                    f"SELECT Email, Password, Name FROM {table} WHERE Email=?", (hhmail,))
 
-                for (email, passwd) in dbCurr:
+                for (email, passwd, name) in dbCurr:
                     flag = True
                     if passwd == hhpass:
                         session["email"] = email
+                        session["name"] = name
                         print(f"User with email {email} logged in successfully")
                     else:
                         print(f"Wrong Password for email {email}")
@@ -183,7 +184,7 @@ def dashboard():
 
     db = dbConnect()
     dbCurr = db.cursor()
-    dbCurr.execute("SELECT Email FROM Contributors WHERE Email=?", (doubleHash(session['email']), ))
+    dbCurr.execute("SELECT Email FROM Contributors WHERE Email=?", (session['email'], ))
 
     authorized = False
     for _ in dbCurr:
