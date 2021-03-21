@@ -27,11 +27,11 @@ app.secret_key = SHA256.new(secretKey.encode()).hexdigest()
 app.config['UPLOAD_FOLDER'] = uploadFolder
 
 
-def doubleHash(input: str) -> str:
+def doubleHash(toBeHashed: str) -> str:
     '''
     return the double hash of the input string
     '''
-    return SHA256.new((SHA256.new(input.encode()).hexdigest()).encode()).hexdigest()
+    return SHA256.new((SHA256.new(toBeHashed.encode()).hexdigest()).encode()).hexdigest()
 
 
 def dbConnect():
@@ -226,8 +226,9 @@ def dashboard():
             
     
         return render_template("dashboard.html")
-    else:
-        return redirect(url_for("forbidden"))
+
+    # if not authorized, forbidden
+    return redirect(url_for("forbidden"))
 
 @app.route("/forbidden/")
 def forbidden():
