@@ -15,9 +15,9 @@ CREATE TABLE `Video` (
 );
 
 CREATE TABLE `Course` (
-  `id` int PRIMARY KEY,
+  `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) DEFAULT null,
-  `time` datetime DEFAULT null
+  `time` int DEFAULT null
 );
 
 CREATE TABLE `Student` (
@@ -69,4 +69,3 @@ ALTER TABLE `Enrollment` ADD FOREIGN KEY (`id`) REFERENCES `Course` (`id`);
 ALTER TABLE `Visualization` ADD FOREIGN KEY (`email`) REFERENCES `Student` (`email`);
 
 ALTER TABLE `Visualization` ADD FOREIGN KEY (`id`) REFERENCES `Video` (`id`);
-
