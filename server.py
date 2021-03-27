@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from werkzeug.utils import secure_filename
 from datetime import timedelta
-from Crypto.Hash import SHA256
+from Crypto.Hash import SHA3_256
 from dotenv import load_dotenv
 import mariadb
 import os
@@ -10,7 +10,6 @@ import re
 # loading .env file
 load_dotenv()
 secretKey = os.getenv("SECRET_KEY")
-
 
 # .env allocation
 dbUser = os.getenv("DB_USER")
@@ -23,7 +22,7 @@ videoFormats = os.getenv("VIDEO_FORMATS").split(', ')
 
 # Flask inizialization
 app = Flask(__name__)
-app.secret_key = SHA256.new(secretKey.encode()).hexdigest()
+app.secret_key = SHA3_256.new(secretKey.encode()).hexdigest()
 app.config['UPLOAD_FOLDER'] = uploadFolder
 
 
@@ -31,7 +30,7 @@ def doubleHash(toBeHashed: str) -> str:
     '''
     return the double hash of the input string
     '''
-    return SHA256.new((SHA256.new(toBeHashed.encode()).hexdigest()).encode()).hexdigest()
+    return SHA3_256.new((SHA3_256.new(toBeHashed.encode()).hexdigest()).encode()).hexdigest()
 
 
 def dbConnect():
@@ -69,11 +68,10 @@ def home():
     '''
     Renders the homepage template
     '''
-    try:
-        print(f"EMAIL: {session['email']}")
-    except KeyError:
-        print("no session data")
-        
+    # try:
+    #     print(f"EMAIL: {session['email']}")
+    # except KeyError:
+    #     print("no session data")
 
     return render_template("index.html")
 
@@ -98,29 +96,30 @@ def login():
         except KeyError:
             pass
 
-        # Connection to db
-        db = dbConnect()
-        dbCurr = db.cursor()
-
         # The database stores hash of hash of both email and password
         hhmail = doubleHash(email)
         hhpass = doubleHash(password)
+
+        # Connection to db
+        db = dbConnect()
+        dbCurr = db.cursor()
         flag = False
 
-        for table in ["Students", "Contributors"]:
-            
+        for table in ["Student", "Contributor"]:
+
             if not flag:
                 dbCurr.execute(
-                    f"SELECT Email, Password, Name FROM {table} WHERE Email=?", (hhmail,))
+                    f"SELECT password, name FROM {table} WHERE Email=?", (hhmail,))
 
-                for (email, passwd, name) in dbCurr:
+                for (passwd, name) in dbCurr:
                     flag = True
                     if passwd == hhpass:
-                        session["email"] = email
+                        session["email"] = hhmail
                         session["name"] = name
-                        print(f"User with email {email} logged in successfully")
+                        print(
+                            f"User with email {hhmail} logged in successfully")
                     else:
-                        print(f"Wrong Password for email {email}")
+                        print(f"Wrong Password for email {hhmail}")
 
         db.close()
         return redirect(url_for("home"))
@@ -147,7 +146,7 @@ def register():
         db = dbConnect()
         dbCurr = db.cursor()
 
-        dbCurr.execute("SELECT Email FROM Students WHERE Email=?", (hhmail, ))
+        dbCurr.execute("SELECT email FROM Student WHERE email=?", (hhmail, ))
 
         alreadyRegistered = False
         for _ in dbCurr:
@@ -157,7 +156,7 @@ def register():
         try:
             if not alreadyRegistered:
                 dbCurr.execute(
-                    "INSERT INTO Students (Email, Password, Name, Surname) VALUES (?, ?, ?, ?)", (hhmail, doubleHash(password), name, doubleHash(surname)))
+                    "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, doubleHash(password), name, doubleHash(surname)))
         except mariadb.Error as e:
             db.close()
             print(f"👿Something happended {e}")
@@ -182,13 +181,17 @@ def logout():
 @app.route("/dashboard/", methods=['POST', 'GET'])
 def dashboard():
 
-    db = dbConnect()
-    dbCurr = db.cursor()
-    dbCurr.execute("SELECT Email FROM Contributors WHERE Email=?", (session['email'], ))
-
     authorized = False
-    for _ in dbCurr:
-        authorized = True
+
+    if 'email' in session:
+        db = dbConnect()
+        dbCurr = db.cursor()
+        dbCurr.execute("SELECT email FROM Contributor WHERE Email=?",
+                       (session['email'], ))
+
+        # is there a better way to do this?
+        for _ in dbCurr:
+            authorized = True
 
     # POST request in this page uploads a new video
     if authorized:
@@ -216,19 +219,20 @@ def dashboard():
             else:
                 print("Non accepted extension")
                 db.close()
-    
+
             description = request.form['description']
             path = f"videos/{filename}"
 
-            dbCurr.execute("INSERT INTO Videos (Description, Path) VALUES (?, ?)", (description, path))
+            dbCurr.execute(
+                "INSERT INTO Video (description, path) VALUES (?, ?)", (description, path))
             db.commit()
             db.close()
-            
-    
+
         return render_template("dashboard.html")
 
     # if not authorized, forbidden
-    return redirect(url_for("forbidden"))
+    return redirect(url_for("forbidden")), 403
+
 
 @app.route("/forbidden/")
 def forbidden():
@@ -236,6 +240,47 @@ def forbidden():
     Renders the forbidden template
     '''
     return render_template("forbidden.html")
+
+
+@app.route("/courses/")
+def courses():
+
+    # database connection
+    db = dbConnect()
+    dbCurr = db.cursor()
+    courses = []
+
+    # checks if user is authenticated
+    dbCurr.execute("SELECT name, time FROM Course WHERE ")
+    for courseName, courseTime in dbCurr:
+        courses.append((courseName, courseTime))
+
+    # pass the list of Courses IDs that the student is enrolled. Contributors can see all the courses
+    render_template('courses.html', courses)
+
+@app.route("/newCourse/")
+def newCourse():
+    authorized = False
+    if 'email' in session:
+        db = dbConnect()
+        dbCurr = db.cursor()
+        dbCurr.execute("SELECT email FROM Contributor WHERE email=?", (session['email'],))
+        for _ in dbCurr:
+            authorized = True
+    else:
+        return redirect(url_for('login'))
+
+    if authorized:  
+        if request.method == 'POST':
+            name = request.form["name"]
+            time = request.form["time"]
+            dbCurr.execute("INSERT INTO Course (name, time) VALUES (?,?)", (name, time))
+            db.commit()
+            db.close()
+
+        return render_template("newCourse.html")
+    return redirect(url_for('forbidden'), 403)
+
 
 if __name__ == '__main__':
     app.run(threaded=True)
