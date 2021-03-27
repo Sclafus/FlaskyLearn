@@ -1,3 +1,6 @@
+CREATE DATABASE `flaskylearn`;
+USE `flaskylearn`;
+
 CREATE TABLE `Contributor` (
   `email` varchar(255) PRIMARY KEY,
   `name` varchar(255) DEFAULT null,
