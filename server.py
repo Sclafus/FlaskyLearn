@@ -12,18 +12,20 @@ load_dotenv()
 secretKey = os.getenv("SECRET_KEY")
 
 # .env allocation
-dbUser = os.getenv("DB_USER")
-dbPassword = os.getenv("DB_PASSWORD")
-dbHost = os.getenv("DB_HOST")
-dbPort = int(os.getenv("DB_PORT"))
-dbSchema = os.getenv("DB_SCHEMA")
-uploadFolder = os.getenv("UPLOAD_FOLDER")
-videoFormats = os.getenv("VIDEO_FORMATS").split(', ')
+env = {
+    'dbUser' : os.getenv('DB_USER'),
+    'dbPassword' : os.getenv('DB_PASSWORD'),
+    'dbHost' : os.getenv('DB_HOST'),
+    'dbPort' : int(os.getenv('DB_PORT')),
+    'dbSchema' : os.getenv('DB_SCHEMA'),
+    'uploadFolder' : os.getenv('UPLOAD_FOLDER'),
+    'videoFormats' : os.getenv('VIDEO_FORMATS').split(', '),
+}
 
 # Flask inizialization
 app = Flask(__name__)
 app.secret_key = SHA3_256.new(secretKey.encode()).hexdigest()
-app.config['UPLOAD_FOLDER'] = uploadFolder
+app.config['UPLOAD_FOLDER'] = env['uploadFolder']
 
 
 def doubleHash(toBeHashed: str) -> str:
@@ -39,11 +41,11 @@ def dbConnect():
     '''
     try:
         conn = mariadb.connect(
-            user=dbUser,
-            password=dbPassword,
-            host=dbHost,
-            port=dbPort,
-            database=dbSchema
+            user=env['dbUser'],
+            password=env['dbPassword'],
+            host=env['dbHost'],
+            port=env['dbPort'],
+            database=env['dbSchema']
         )
         return conn
 
@@ -58,7 +60,7 @@ def allowedFile(filename: str) -> bool:
     Checks if the file is currently being accepted to upload
     '''
     ext = filename.split(".")[-1]
-    if ext in videoFormats:
+    if ext in env['videoFormats']:
         return True
     return False
 
@@ -251,20 +253,21 @@ def courses():
     courses = []
 
     # checks if user is authenticated
-    dbCurr.execute("SELECT name, time FROM Course WHERE ")
+    dbCurr.execute("SELECT name, time FROM Course ")
     for courseName, courseTime in dbCurr:
         courses.append((courseName, courseTime))
 
+    print(f"{courses}")
     # pass the list of Courses IDs that the student is enrolled. Contributors can see all the courses
-    render_template('courses.html', courses)
+    render_template('courses.html', context=courses)
 
-@app.route("/newCourse/")
+@app.route('/newCourse/', methods=['POST', 'GET'])
 def newCourse():
     authorized = False
     if 'email' in session:
         db = dbConnect()
         dbCurr = db.cursor()
-        dbCurr.execute("SELECT email FROM Contributor WHERE email=?", (session['email'],))
+        dbCurr.execute('SELECT email FROM Contributor WHERE email=?', (session['email'],))
         for _ in dbCurr:
             authorized = True
     else:
@@ -272,15 +275,15 @@ def newCourse():
 
     if authorized:  
         if request.method == 'POST':
-            name = request.form["name"]
-            time = request.form["time"]
-            dbCurr.execute("INSERT INTO Course (name, time) VALUES (?,?)", (name, time))
+            name = request.form['name']
+            time = request.form['time']
+            dbCurr.execute('INSERT INTO Course (name, time) VALUES (?,?)', (name, time))
             db.commit()
             db.close()
+            return redirect(url_for('dashboard'))
 
-        return render_template("newCourse.html")
+        return render_template('newCourse.html')
     return redirect(url_for('forbidden'), 403)
-
 
 if __name__ == '__main__':
     app.run(threaded=True)
