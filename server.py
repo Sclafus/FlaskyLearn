@@ -257,9 +257,7 @@ def courses():
     for courseName, courseTime in dbCurr:
         courses.append((courseName, courseTime))
 
-    print(f"{courses}")
-    # pass the list of Courses IDs that the student is enrolled. Contributors can see all the courses
-    render_template('courses.html', context=courses)
+    return render_template('courses.html', context=courses)
 
 @app.route('/newCourse/', methods=['POST', 'GET'])
 def newCourse():
