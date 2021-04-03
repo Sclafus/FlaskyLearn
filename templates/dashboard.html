@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<a name="newCourse" id="newCourse" class="btn btn-secondary" href="{{url_for('newCourse')}}" role="button">Add new Course</a>
+<br>
+<a name="newCourse" id="newCourse" class="btn btn-secondary margin" href="{{url_for('newCourse')}}" role="button">Add new Course</a>
 
 <h1>Upload New Video</h1>
 
@@ -16,15 +17,15 @@
   </div>
 
   <div class="dropdown">
-    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      Dropdown button
-    </button>
-    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-      <!-- <a class="dropdown-item" href="#">Action</a>
-      <a class="dropdown-item" href="#">Another action</a>
-      <a class="dropdown-item" href="#">Something else here</a> -->
-    </div>
+    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Dropdown Example
+    <span class="caret"></span></button>
+    <ul class="dropdown-menu">
+      {% for index, element in context: %}
+        <li><a name='{{index}}' href="#">{{element}}</a></li>
+      {% endfor %}
+    </ul>
   </div>
+  <br>
   <button type="submit" class="btn btn-primary">Upload</button>
 </form>
 {% endblock %}
