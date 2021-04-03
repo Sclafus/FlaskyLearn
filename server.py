@@ -1,8 +1,9 @@
-from flask import Flask, redirect, url_for, render_template, request, session, flash
+from flask import Flask, redirect, url_for, render_template, request, session, flash, abort
 from werkzeug.utils import secure_filename
 from datetime import timedelta
 from Crypto.Hash import SHA3_256
 from dotenv import load_dotenv
+from functools import lru_cache
 import mariadb
 import os
 import re
@@ -13,13 +14,13 @@ secretKey = os.getenv("SECRET_KEY")
 
 # .env allocation
 env = {
-    'dbUser' : os.getenv('DB_USER'),
-    'dbPassword' : os.getenv('DB_PASSWORD'),
-    'dbHost' : os.getenv('DB_HOST'),
-    'dbPort' : int(os.getenv('DB_PORT')),
-    'dbSchema' : os.getenv('DB_SCHEMA'),
-    'uploadFolder' : os.getenv('UPLOAD_FOLDER'),
-    'videoFormats' : os.getenv('VIDEO_FORMATS').split(', '),
+    'dbUser': os.getenv('DB_USER'),
+    'dbPassword': os.getenv('DB_PASSWORD'),
+    'dbHost': os.getenv('DB_HOST'),
+    'dbPort': int(os.getenv('DB_PORT')),
+    'dbSchema': os.getenv('DB_SCHEMA'),
+    'uploadFolder': os.getenv('UPLOAD_FOLDER'),
+    'videoFormats': os.getenv('VIDEO_FORMATS').split(', '),
 }
 
 # Flask inizialization
@@ -63,6 +64,24 @@ def allowedFile(filename: str) -> bool:
     if ext in env['videoFormats']:
         return True
     return False
+
+# Error handlers
+
+
+@app.errorhandler(403)
+def forbidden(e):
+    '''
+    Error page for 403 forbidden http error
+    '''
+    return render_template("403.html"), 403
+
+
+@app.errorhandler(404)
+def not_found(e):
+    '''
+    Error page for 404 not found http error
+    '''
+    return render_template('404.html'), 404
 
 
 @app.route("/")
@@ -182,6 +201,9 @@ def logout():
 
 @app.route("/dashboard/", methods=['POST', 'GET'])
 def dashboard():
+    '''
+    Displays the dashboard only for authorized users (aka contributors)
+    '''
 
     authorized = False
 
@@ -199,7 +221,6 @@ def dashboard():
     if authorized:
 
         if (request.method == 'POST'):
-            # TODO check the name of the file for _
 
             # File checks
             if 'video' not in request.files:
@@ -214,7 +235,12 @@ def dashboard():
                 db.close()
                 return redirect(request.url)
 
-            # TODO add progress bar
+            # handles _ char
+            if '_' in file.filename:
+                print('Pls no underscores in filename uwu')
+                db.close()
+                return redirect(request.url)
+
             if file and allowedFile(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
@@ -224,24 +250,21 @@ def dashboard():
 
             description = request.form['description']
             path = f"videos/{filename}"
+            print(request.form)
 
             dbCurr.execute(
                 "INSERT INTO Video (description, path) VALUES (?, ?)", (description, path))
             db.commit()
-            db.close()
 
-        return render_template("dashboard.html")
+        courses = []
+        dbCurr.execute("SELECT id, name FROM Course")
+        for _, courseName in dbCurr:
+            courses.append(courseName)
+        db.close()
+        return render_template("dashboard.html", context=enumerate(courses))
 
     # if not authorized, forbidden
-    return redirect(url_for("forbidden")), 403
-
-
-@app.route("/forbidden/")
-def forbidden():
-    '''
-    Renders the forbidden template
-    '''
-    return render_template("forbidden.html")
+    return abort(403)
 
 
 @app.route("/courses/")
@@ -253,11 +276,12 @@ def courses():
     courses = []
 
     # checks if user is authenticated
-    dbCurr.execute("SELECT name, time FROM Course ")
+    dbCurr.execute("SELECT name, time FROM Course")
     for courseName, courseTime in dbCurr:
         courses.append((courseName, courseTime))
 
     return render_template('courses.html', context=courses)
+
 
 @app.route('/newCourse/', methods=['POST', 'GET'])
 def newCourse():
@@ -265,23 +289,53 @@ def newCourse():
     if 'email' in session:
         db = dbConnect()
         dbCurr = db.cursor()
-        dbCurr.execute('SELECT email FROM Contributor WHERE email=?', (session['email'],))
+        dbCurr.execute(
+            'SELECT email FROM Contributor WHERE email=?', (session['email'],))
         for _ in dbCurr:
             authorized = True
     else:
-        return redirect(url_for('login'))
+        return abort(403)
 
-    if authorized:  
+    if authorized:
         if request.method == 'POST':
             name = request.form['name']
             time = request.form['time']
-            dbCurr.execute('INSERT INTO Course (name, time) VALUES (?,?)', (name, time))
+            dbCurr.execute(
+                'INSERT INTO Course (name, time) VALUES (?,?)', (name, time))
             db.commit()
             db.close()
             return redirect(url_for('dashboard'))
 
         return render_template('newCourse.html')
-    return redirect(url_for('forbidden'), 403)
+    return abort(403)
+
+
+@lru_cache
+@app.route('/quiz/')
+def quiz():
+    db = dbConnect()
+    dbCurr = db.cursor()
+    courses = {}
+
+    # getting all the courses, using a cache to improve performance
+    dbCurr.execute("SELECT name, id FROM Course")
+    for courseName, courseID in dbCurr:
+        courses[courseID] = courseName
+
+    enrolled = []
+    try:
+        dbCurr.execute("SELECT id FROM Enrollment WHERE email=?",
+                       (session['email'],))
+    except KeyError:
+        # user not logged in
+        return abort(403)
+    else:
+        # getting the name of the course
+        for courseID in dbCurr:
+            enrolled.append(courses[courseID])
+
+    return render_template('quiz.html', context=enrolled)
+
 
 if __name__ == '__main__':
     app.run(threaded=True)
