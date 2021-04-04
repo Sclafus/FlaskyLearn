@@ -265,7 +265,7 @@ def dashboard():
             for _videoIDTuple in dbCurr:
                 videoID = _videoIDTuple[0]
                 
-            # adding to Release table 
+            # TODO FIX ME adding to Release table 
             # now = datetime.now()
             # dbCurr.execute("INSERT INTO Release (email, id, timestamp) VALUES (?, ?, ?)", (session['email'], videoID, now.strftime('%Y-%m-%d %H:%M:%S')))
             
@@ -360,4 +360,4 @@ def quiz():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True)
+    app.run(threaded=True)
