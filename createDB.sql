@@ -30,6 +30,7 @@ CREATE TABLE `Student` (
 CREATE TABLE `Release` (
   `email` varchar(255),
   `id` int,
+  `timestamp` datetime DEFAULT null,
   PRIMARY KEY (`email`, `id`)
 );
 
