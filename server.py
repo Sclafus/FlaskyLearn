@@ -1,6 +1,6 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash, abort
 from werkzeug.utils import secure_filename
-from datetime import timedelta
+from datetime import timedelta, datetime
 from Crypto.Hash import SHA3_256
 from dotenv import load_dotenv
 from functools import lru_cache
@@ -249,19 +249,40 @@ def dashboard():
                 db.close()
 
             description = request.form['description']
+
+            # maybe improve this?
             path = f"videos/{filename}"
             print(request.form)
 
+            # insert new video in table 
             dbCurr.execute(
                 "INSERT INTO Video (description, path) VALUES (?, ?)", (description, path))
             db.commit()
 
+
+            # getting video ID
+            dbCurr.execute("SELECT id FROM Video WHERE description=? AND path=?", (description, path))
+            for _videoIDTuple in dbCurr:
+                videoID = _videoIDTuple[0]
+                
+            # adding to Release table 
+            dbCurr.execute("INSERT INTO Release (email, id, timestamp) VALUES (?, ?, ?)", (session['email'], videoID, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            
+            #getting course ID
+            dbCurr.execute("SELECT id FROM Course WHERE name=?", (request.form['course'],))
+            for _courseIDTuple in dbCurr:
+                courseID = _courseIDTuple[0]
+
+            # adding the video to the course
+            dbCurr.execute("INSERT INTO Composition (videoid, courseid, lesson) VALUES (?, ?, ?)", (videoID, courseID, int(request.form['lessonNum'])))
+            db.commit()
+
         courses = []
-        dbCurr.execute("SELECT id, name FROM Course")
-        for _, courseName in dbCurr:
-            courses.append(courseName)
+        dbCurr.execute("SELECT name FROM Course")
+        for courseName in dbCurr:
+            courses.append(courseName[0])
         db.close()
-        return render_template("dashboard.html", context=enumerate(courses))
+        return render_template("dashboard.html", context=courses)
 
     # if not authorized, forbidden
     return abort(403)

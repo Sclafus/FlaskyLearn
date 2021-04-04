@@ -8,7 +8,7 @@
 
 <form method="post" enctype=multipart/form-data>
   <div class="form-group">
-    <input type="file" class="form-control-file" name="video" id="video" placeholder="Select File" aria-describedby="New File">
+    <input type="file" class="form-control-file" name="video" id="video" placeholder="Select File" aria-describedby="New File" required>
   </div>
 
   <div class="form-group">
@@ -16,15 +16,20 @@
     <textarea class="form-control" name="description" id="description" rows="4"></textarea>
   </div>
 
-  <div class="dropdown">
-    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Dropdown Example
-    <span class="caret"></span></button>
-    <ul class="dropdown-menu">
-      {% for index, element in context: %}
-        <li><a name='{{index}}' href="#">{{element}}</a></li>
+  <div class="form-group">
+    <label for="course">Select the course</label>
+    <select class="form-control" name="course" id="course" required>
+      {% for element in context: %}
+        <option value='{{element}}'>{{element}}</option>
       {% endfor %}
-    </ul>
+    </select>
   </div>
+
+  <div class="form-group">
+    <label for="lessonNum">Lesson number</label>
+    <input type="number" class="form-control" name="lessonNum" id="lessonNum" min=1 placeholder="1" required>
+  </div>
+
   <br>
   <button type="submit" class="btn btn-primary">Upload</button>
 </form>
