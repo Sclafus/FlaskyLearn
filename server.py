@@ -266,7 +266,8 @@ def dashboard():
                 videoID = _videoIDTuple[0]
                 
             # adding to Release table 
-            dbCurr.execute("INSERT INTO Release (email, id, timestamp) VALUES (?, ?, ?)", (session['email'], videoID, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            # now = datetime.now()
+            # dbCurr.execute("INSERT INTO Release (email, id, timestamp) VALUES (?, ?, ?)", (session['email'], videoID, now.strftime('%Y-%m-%d %H:%M:%S')))
             
             #getting course ID
             dbCurr.execute("SELECT id FROM Course WHERE name=?", (request.form['course'],))
@@ -359,4 +360,4 @@ def quiz():
 
 
 if __name__ == '__main__':
-    app.run(threaded=True)
+    app.run(debug=True, threaded=True)
