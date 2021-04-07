@@ -134,9 +134,9 @@ def login():
                         print(
                             f"User with email {hhmail} logged in successfully")
                         return redirect(url_for("home"))
-                    else:
-                        flash("Wrong password")
-                        print(f"Wrong Password for email {hhmail}")
+                        
+                    flash("Wrong password")
+                    print(f"Wrong Password for email {hhmail}")
 
         db.close()
 
@@ -174,9 +174,9 @@ def register():
                 dbCurr.execute(
                     "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, doubleHash(password), name, doubleHash(surname)))
                 db.commit()
-                return redirect(url_for("home"))  
-            else:
-                flash("This email has already been used.")
+                return redirect(url_for("home"))
+
+            flash("This email has already been used.")
         except mariadb.Error as e:
             db.close()
             print(f"👿Something happended {e}")
