@@ -67,7 +67,6 @@ def allowedFile(filename: str) -> bool:
 
 # Error handlers
 
-
 @app.errorhandler(403)
 def forbidden(e):
     '''
@@ -89,11 +88,6 @@ def home():
     '''
     Renders the homepage template
     '''
-    # try:
-    #     print(f"EMAIL: {session['email']}")
-    # except KeyError:
-    #     print("no session data")
-
     return render_template("index.html")
 
 
@@ -139,11 +133,12 @@ def login():
                         session["name"] = name
                         print(
                             f"User with email {hhmail} logged in successfully")
+                        return redirect(url_for("home"))
                     else:
+                        flash("Wrong password")
                         print(f"Wrong Password for email {hhmail}")
 
         db.close()
-        return redirect(url_for("home"))
 
     return render_template("login.html")
 
@@ -178,14 +173,16 @@ def register():
             if not alreadyRegistered:
                 dbCurr.execute(
                     "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, doubleHash(password), name, doubleHash(surname)))
+                db.commit()
+                return redirect(url_for("home"))  
+            else:
+                flash("This email has already been used.")
         except mariadb.Error as e:
             db.close()
             print(f"👿Something happended {e}")
 
         # commit changes to db
-        db.commit()
         db.close()
-        return redirect(url_for("home"))
 
     return render_template("register.html")
 
@@ -267,7 +264,9 @@ def dashboard():
                 
             # TODO FIX ME adding to Release table 
             # now = datetime.now()
-            # dbCurr.execute("INSERT INTO Release (email, id, timestamp) VALUES (?, ?, ?)", (session['email'], videoID, now.strftime('%Y-%m-%d %H:%M:%S')))
+            # timestamp = now.strftime('%Y-%m-%d %H:%M:%S')
+            # print(f"--------{timestamp}---------")
+            # dbCurr.execute("INSERT INTO Release (email, id, timestamp) VALUES (?, ?, ?)", (session['email'], videoID, timestamp))
             
             #getting course ID
             dbCurr.execute("SELECT id FROM Course WHERE name=?", (request.form['course'],))

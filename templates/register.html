@@ -1,6 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
 {% block content %}
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for msg in messages%}
+    <div class="alert alert-warning alert-dismissible fade show margin" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <strong>{{msg}}</strong> 
+    </div>
+    
+    <script>
+      $(".alert").alert();
+      </script>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
 <form action="#" method="POST">
 
   <div class="form-group">
