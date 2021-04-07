@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from functools import lru_cache
 import mariadb
 import os
-import re
 
 # loading .env file
 load_dotenv()
@@ -67,6 +66,7 @@ def allowedFile(filename: str) -> bool:
 
 # Error handlers
 
+
 @app.errorhandler(403)
 def forbidden(e):
     '''
@@ -97,6 +97,7 @@ def login():
     Redirects to login.html 
     Handles POST requests to login users
     '''
+
     if request.method == "POST":
 
         email = request.form["email"]
@@ -118,25 +119,27 @@ def login():
         # Connection to db
         db = dbConnect()
         dbCurr = db.cursor()
-        flag = False
 
-        for table in ["Student", "Contributor"]:
+        # checks if the email is present in the database
+        for table in ['Student', 'Contributor']:
 
-            if not flag:
-                dbCurr.execute(
-                    f"SELECT password, name FROM {table} WHERE Email=?", (hhmail,))
+            dbCurr.execute(
+                f"SELECT password, name FROM {table} WHERE Email=?", (hhmail,))
 
-                for (passwd, name) in dbCurr:
-                    flag = True
-                    if passwd == hhpass:
-                        session["email"] = hhmail
-                        session["name"] = name
-                        print(
-                            f"User with email {hhmail} logged in successfully")
-                        return redirect(url_for("home"))
-                        
-                    flash("Wrong password")
-                    print(f"Wrong Password for email {hhmail}")
+            for (passwd, name) in dbCurr:
+
+                if passwd == hhpass:
+                    # both password and email are valid, logging in
+                    session["email"] = hhmail
+                    session["name"] = name
+                    print(f"User with email {hhmail} logged in successfully")
+                    return redirect(url_for("home"))
+
+                # email is right, password is wrong, flashing message
+                flash("Wrong password")
+        # user not registered
+        else:
+            flash("You are not registered")
 
         db.close()
 
@@ -158,28 +161,26 @@ def register():
 
         # double hash password and mail
         hhmail = doubleHash(email)
+
         # Connection to db
         db = dbConnect()
         dbCurr = db.cursor()
 
+        # checks if the email has already been used
         dbCurr.execute("SELECT email FROM Student WHERE email=?", (hhmail, ))
-
         alreadyRegistered = False
         for _ in dbCurr:
             alreadyRegistered = True
 
-        # Insert data to db
-        try:
-            if not alreadyRegistered:
-                dbCurr.execute(
-                    "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, doubleHash(password), name, doubleHash(surname)))
-                db.commit()
-                return redirect(url_for("home"))
+        # Insert data in the database
+        if not alreadyRegistered:
+            dbCurr.execute(
+                "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, doubleHash(password), name, surname))
+            db.commit()
+            return redirect(url_for("home"))
 
-            flash("This email has already been used.")
-        except mariadb.Error as e:
-            db.close()
-            print(f"👿Something happended {e}")
+        # flashing message if the email is already present
+        flash("This email has already been used.")
 
         # commit changes to db
         db.close()
@@ -204,13 +205,14 @@ def dashboard():
 
     authorized = False
 
+    # checks if the user is authenticated
     if 'email' in session:
         db = dbConnect()
         dbCurr = db.cursor()
         dbCurr.execute("SELECT email FROM Contributor WHERE Email=?",
                        (session['email'], ))
 
-        # is there a better way to do this?
+        # let's check if the user is authenticated
         for _ in dbCurr:
             authorized = True
 
@@ -249,34 +251,37 @@ def dashboard():
 
             # maybe improve this?
             path = f"videos/{filename}"
-            print(request.form)
 
-            # insert new video in table 
+            # insert new video in table
             dbCurr.execute(
                 "INSERT INTO Video (description, path) VALUES (?, ?)", (description, path))
             db.commit()
 
-
             # getting video ID
-            dbCurr.execute("SELECT id FROM Video WHERE description=? AND path=?", (description, path))
+            dbCurr.execute(
+                "SELECT id FROM Video WHERE description=? AND path=?", (description, path))
             for _videoIDTuple in dbCurr:
                 videoID = _videoIDTuple[0]
-                
-            # TODO FIX ME adding to Release table 
-            # now = datetime.now()
-            # timestamp = now.strftime('%Y-%m-%d %H:%M:%S')
-            # print(f"--------{timestamp}---------")
-            # dbCurr.execute("INSERT INTO Release (email, id, timestamp) VALUES (?, ?, ?)", (session['email'], videoID, timestamp))
-            
-            #getting course ID
-            dbCurr.execute("SELECT id FROM Course WHERE name=?", (request.form['course'],))
+
+            # getting course ID
+            dbCurr.execute("SELECT id FROM Course WHERE name=?",
+                           (request.form['course'],))
             for _courseIDTuple in dbCurr:
                 courseID = _courseIDTuple[0]
 
-            # adding the video to the course
-            dbCurr.execute("INSERT INTO Composition (videoid, courseid, lesson) VALUES (?, ?, ?)", (videoID, courseID, int(request.form['lessonNum'])))
+            # insert new video in release table
+            # FIXME doesn't work
+            # now = datetime.now()
+            # timestamp = int(now.strftime('%Y%m%d%H%M%S%f'))
+            # dbCurr.execute("INSERT INTO Release (email, id, timestamp) VALUES (?, ?, ?)",
+            #                (session['email'], videoID, timestamp))
+
+            # insert new video in the course
+            dbCurr.execute("INSERT INTO Composition (videoid, courseid, lesson) VALUES (?, ?, ?)",
+                           (videoID, courseID, int(request.form['lessonNum'])))
             db.commit()
 
+        # getting the couses available
         courses = []
         dbCurr.execute("SELECT name FROM Course")
         for courseName in dbCurr:
@@ -297,9 +302,9 @@ def courses():
     courses = []
 
     # checks if user is authenticated
-    dbCurr.execute("SELECT name, time FROM Course")
-    for courseName, courseTime in dbCurr:
-        courses.append((courseName, courseTime))
+    dbCurr.execute("SELECT name, duration FROM Course")
+    for courseName, courseDuration in dbCurr:
+        courses.append((courseName, courseDuration))
 
     return render_template('courses.html', context=courses)
 
@@ -320,9 +325,9 @@ def newCourse():
     if authorized:
         if request.method == 'POST':
             name = request.form['name']
-            time = request.form['time']
+            duration = request.form['time']
             dbCurr.execute(
-                'INSERT INTO Course (name, time) VALUES (?,?)', (name, time))
+                'INSERT INTO Course (name, duration) VALUES (?,?)', (name, duration))
             db.commit()
             db.close()
             return redirect(url_for('dashboard'))
