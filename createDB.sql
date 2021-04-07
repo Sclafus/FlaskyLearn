@@ -2,10 +2,10 @@ CREATE DATABASE `flaskylearn`;
 USE `flaskylearn`;
 
 CREATE TABLE `Contributor` (
-  `email` varchar(255) PRIMARY KEY,
+  `email` varchar(64) PRIMARY KEY,
   `name` varchar(255) DEFAULT null,
-  `surname` varchar(255) DEFAULT null,
-  `password` varchar(255) DEFAULT null
+  `surname` varchar(64) DEFAULT null,
+  `password` varchar(64) DEFAULT null
 );
 
 CREATE TABLE `Video` (
@@ -17,20 +17,20 @@ CREATE TABLE `Video` (
 CREATE TABLE `Course` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) DEFAULT null,
-  `time` int DEFAULT null
+  `duration` int  UNSIGNED DEFAULT null
 );
 
 CREATE TABLE `Student` (
-  `email` varchar(255) PRIMARY KEY,
+  `email` varchar(64) PRIMARY KEY,
   `name` varchar(255) DEFAULT null,
   `surname` varchar(255) DEFAULT null,
-  `password` varchar(255) DEFAULT null
+  `password` varchar(64) DEFAULT null
 );
 
 CREATE TABLE `Release` (
-  `email` varchar(255),
+  `email` varchar(64),
   `id` int,
-  `timestamp` datetime DEFAULT null,
+  `timestamp` bigint UNSIGNED DEFAULT null,
   PRIMARY KEY (`email`, `id`)
 );
 
@@ -42,16 +42,16 @@ CREATE TABLE `Composition` (
 );
 
 CREATE TABLE `Enrollment` (
-  `email` varchar(255),
+  `email` varchar(64),
   `id` int,
-  `timestamp` datetime DEFAULT null,
+  `timestamp` bigint UNSIGNED DEFAULT null,
   PRIMARY KEY (`email`, `id`)
 );
 
 CREATE TABLE `Visualization` (
-  `email` varchar(255),
+  `email` varchar(64),
   `id` int,
-  `timestamp` datetime,
+  `timestamp` bigint UNSIGNED,
   PRIMARY KEY (`email`, `id`, `timestamp`)
 );
 
