@@ -120,6 +120,7 @@ def login():
         db = dbConnect()
         dbCurr = db.cursor()
 
+        hasResult = False
         # checks if the email is present in the database
         for table in ['Student', 'Contributor']:
 
@@ -127,7 +128,7 @@ def login():
                 f"SELECT password, name FROM {table} WHERE Email=?", (hhmail,))
 
             for (passwd, name) in dbCurr:
-
+                hasResult = True
                 if passwd == hhpass:
                     # both password and email are valid, logging in
                     session["email"] = hhmail
@@ -137,8 +138,9 @@ def login():
 
                 # email is right, password is wrong, flashing message
                 flash("Wrong password")
+
         # user not registered
-        else:
+        if not hasResult:
             flash("You are not registered")
 
         db.close()
