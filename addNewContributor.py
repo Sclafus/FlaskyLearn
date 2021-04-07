@@ -11,10 +11,15 @@ def main():
     name = input("Insert the name of the new contributor: ")
     surname = input("Insert the surname of the new contributor: ")
     password = input("Insert the password of the new contributor: ")
-    
+
+    #hashing the sensitive informations
+    hhmail = doubleHash(email)
+    hhpassword = doubleHash(password)
+    hhsurname = doubleHash(surname)
+
     #add contributor manually
     dbCurr.execute("INSERT INTO Contributor (email, password, name, surname) VALUES (?, ?, ?, ?)",
-    (doubleHash(email), doubleHash(password), name, doubleHash(surname)))
+    (hhmail, hhpassword, name, hhsurname))
     db.commit()
     db.close()
     
