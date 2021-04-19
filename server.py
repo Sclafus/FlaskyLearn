@@ -3,9 +3,9 @@ from werkzeug.utils import secure_filename
 from datetime import timedelta, datetime
 from Crypto.Hash import SHA3_256
 from dotenv import load_dotenv
-from functools import lru_cache
 import mariadb
 import os
+from utils import Utils
 
 # loading .env file
 load_dotenv()
@@ -26,13 +26,7 @@ env = {
 app = Flask(__name__)
 app.secret_key = SHA3_256.new(secretKey.encode()).hexdigest()
 app.config['UPLOAD_FOLDER'] = env['uploadFolder']
-
-
-def doubleHash(toBeHashed: str) -> str:
-    '''
-    return the double hash of the input string
-    '''
-    return SHA3_256.new((SHA3_256.new(toBeHashed.encode()).hexdigest()).encode()).hexdigest()
+util = Utils(env)
 
 
 def dbConnect():
@@ -54,15 +48,6 @@ def dbConnect():
         raise Exception
     return None
 
-
-def allowedFile(filename: str) -> bool:
-    '''
-    Checks if the file is currently being accepted to upload
-    '''
-    ext = filename.split(".")[-1]
-    if ext in env['videoFormats']:
-        return True
-    return False
 
 # Error handlers
 
@@ -113,8 +98,8 @@ def login():
             pass
 
         # The database stores hash of hash of both email and password
-        hhmail = doubleHash(email)
-        hhpass = doubleHash(password)
+        hhmail = util.doubleHash(email)
+        hhpass = util.doubleHash(password)
 
         # Connection to db
         db = dbConnect()
@@ -162,7 +147,7 @@ def register():
         password = request.form["password"]
 
         # double hash password and mail
-        hhmail = doubleHash(email)
+        hhmail = util.doubleHash(email)
 
         # Connection to db
         db = dbConnect()
@@ -177,7 +162,7 @@ def register():
         # Insert data in the database
         if not alreadyRegistered:
             dbCurr.execute(
-                "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, doubleHash(password), name, surname))
+                "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, util.doubleHash(password), name, surname))
             db.commit()
             return redirect(url_for("home"))
 
@@ -242,7 +227,7 @@ def dashboard():
                 db.close()
                 return redirect(request.url)
 
-            if file and allowedFile(file.filename):
+            if file and util.allowedFile(file.filename):
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             else:
@@ -272,14 +257,14 @@ def dashboard():
                 courseID = _courseIDTuple[0]
 
             # insert new video in release table
-            # FIXME doesn't work
-            # now = datetime.now()
-            # timestamp = int(now.strftime('%Y%m%d%H%M%S%f'))
-            # dbCurr.execute("INSERT INTO Release (email, id, timestamp) VALUES (?, ?, ?)",
-            #                (session['email'], videoID, timestamp))
+
+            ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            dbCurr.execute("INSERT INTO flaskylearn.Release VALUES (?, ?, ?)",
+                           (session['email'], videoID, ts))
 
             # insert new video in the course
-            dbCurr.execute("INSERT INTO Composition (videoid, courseid, lesson) VALUES (?, ?, ?)",
+            dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",
                            (videoID, courseID, int(request.form['lessonNum'])))
             db.commit()
 
@@ -338,7 +323,6 @@ def newCourse():
     return abort(403)
 
 
-@lru_cache
 @app.route('/quiz/')
 def quiz():
     db = dbConnect()
