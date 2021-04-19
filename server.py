@@ -39,7 +39,8 @@ def dbConnect():
             password=env['dbPassword'],
             host=env['dbHost'],
             port=env['dbPort'],
-            database=env['dbSchema']
+            database=env['dbSchema'],
+            autocommit=True
         )
         return conn
 
@@ -68,6 +69,9 @@ def not_found(e):
     return render_template('404.html'), 404
 
 
+db = dbConnect()
+
+
 @app.route("/")
 def home():
     '''
@@ -83,54 +87,52 @@ def login():
     Handles POST requests to login users
     '''
 
-    if request.method == "POST":
+    # NOT a post request, returning login page
+    if request.method != "POST":
+        return render_template("login.html")
 
-        email = request.form["email"]
-        password = request.form["password"]
+    # POST Request = login attempt
+    email = request.form["email"]
+    password = request.form["password"]
 
-        # handling unchecked "Remember me" option
-        try:
-            stayLogged = request.form["stayLogged"]
-            if stayLogged:
-                app.permanent_session_lifetime = timedelta(days=1000)
+    # handling unchecked "Remember me" option
+    try:
+        stayLogged = request.form["stayLogged"]
+        if stayLogged:
+            app.permanent_session_lifetime = timedelta(days=1000)
 
-        except KeyError:
-            pass
+    except KeyError:
+        pass
 
-        # The database stores hash of hash of both email and password
-        hhmail = util.doubleHash(email)
-        hhpass = util.doubleHash(password)
+    # The database stores hash of hash of both email and password
+    hhmail = util.doubleHash(email)
+    hhpass = util.doubleHash(password)
 
-        # Connection to db
-        db = dbConnect()
-        dbCurr = db.cursor()
+    # Connection to db
+    dbCurr = db.cursor()
 
-        hasResult = False
-        # checks if the email is present in the database
-        for table in ['Student', 'Contributor']:
+    hasResult = False
+    # checks if the email is present in the database
+    for table in ['Student', 'Contributor']:
 
-            dbCurr.execute(
-                f"SELECT password, name FROM {table} WHERE Email=?", (hhmail,))
+        dbCurr.execute(
+            f"SELECT password, name FROM {table} WHERE Email=?", (hhmail,))
 
-            for (passwd, name) in dbCurr:
-                hasResult = True
-                if passwd == hhpass:
-                    # both password and email are valid, logging in
-                    session["email"] = hhmail
-                    session["name"] = name
-                    print(f"User with email {hhmail} logged in successfully")
-                    return redirect(url_for("home"))
+        for (passwd, name) in dbCurr:
+            hasResult = True
+            if passwd == hhpass:
+                # both password and email are valid, logging in
+                session["email"] = hhmail
+                session["name"] = name
+                print(f"User with email {hhmail} logged in successfully")
+                return redirect(url_for("home"))
 
-                # email is right, password is wrong, flashing message
-                flash("Wrong password")
+            # email is right, password is wrong, flashing message
+            flash("Wrong password")
 
-        # user not registered
-        if not hasResult:
-            flash("You are not registered")
-
-        db.close()
-
-    return render_template("login.html")
+    # user not registered
+    if not hasResult:
+        flash("You are not registered")
 
 
 @app.route("/register/", methods=["POST", "GET"])
@@ -139,40 +141,35 @@ def register():
     Register to the Student table
     '''
 
-    if request.method == "POST":
+    if request.method != "POST":
+        return render_template("register.html")
+
         # get data from form
-        name = request.form["name"]
-        surname = request.form["surname"]
-        email = request.form["email"]
-        password = request.form["password"]
+    name = request.form["name"]
+    surname = request.form["surname"]
+    email = request.form["email"]
+    password = request.form["password"]
 
-        # double hash password and mail
-        hhmail = util.doubleHash(email)
+    # double hash password and mail
+    hhmail = util.doubleHash(email)
 
-        # Connection to db
-        db = dbConnect()
-        dbCurr = db.cursor()
+    # Connection to db
+    dbCurr = db.cursor()
 
-        # checks if the email has already been used
-        dbCurr.execute("SELECT email FROM Student WHERE email=?", (hhmail, ))
-        alreadyRegistered = False
-        for _ in dbCurr:
-            alreadyRegistered = True
+    # checks if the email has already been used
+    dbCurr.execute("SELECT email FROM Student WHERE email=?", (hhmail, ))
+    alreadyRegistered = False
+    for _ in dbCurr:
+        alreadyRegistered = True
 
-        # Insert data in the database
-        if not alreadyRegistered:
-            dbCurr.execute(
-                "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, util.doubleHash(password), name, surname))
-            db.commit()
-            return redirect(url_for("home"))
+    # Insert data in the database
+    if not alreadyRegistered:
+        dbCurr.execute(
+            "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, util.doubleHash(password), name, surname))
+        return redirect(url_for("home"))
 
-        # flashing message if the email is already present
-        flash("This email has already been used.")
-
-        # commit changes to db
-        db.close()
-
-    return render_template("register.html")
+    # flashing message if the email is already present
+    flash("This email has already been used.")
 
 
 @app.route("/logout/")
@@ -186,15 +183,12 @@ def logout():
 
 @app.route("/dashboard/", methods=['POST', 'GET'])
 def dashboard():
-    '''
-    Displays the dashboard only for authorized users (aka contributors)
-    '''
+    '''Displays the dashboard only for authorized users (aka contributors)'''
 
     authorized = False
 
     # checks if the user is authenticated
     if 'email' in session:
-        db = dbConnect()
         dbCurr = db.cursor()
         dbCurr.execute("SELECT email FROM Contributor WHERE Email=?",
                        (session['email'], ))
@@ -203,88 +197,80 @@ def dashboard():
         for _ in dbCurr:
             authorized = True
 
-    # POST request in this page uploads a new video
-    if authorized:
+    if not authorized:
+        # if not authorized, forbidden
+        return abort(403)
 
-        if (request.method == 'POST'):
+    # AUTHORIZED
 
-            # File checks
-            if 'video' not in request.files:
-                print('No file part')
-                db.close()
-                return redirect(request.url)
-            file = request.files['video']
-
-            # handles unselected file
-            if file.filename == '':
-                print('No selected file')
-                db.close()
-                return redirect(request.url)
-
-            # handles _ char
-            if '_' in file.filename:
-                print('Pls no underscores in filename uwu')
-                db.close()
-                return redirect(request.url)
-
-            if file and util.allowedFile(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            else:
-                print("Non accepted extension")
-                db.close()
-
-            description = request.form['description']
-
-            # maybe improve this?
-            path = f"videos/{filename}"
-
-            # insert new video in table
-            dbCurr.execute(
-                "INSERT INTO Video (description, path) VALUES (?, ?)", (description, path))
-            db.commit()
-
-            # getting video ID
-            dbCurr.execute(
-                "SELECT id FROM Video WHERE description=? AND path=?", (description, path))
-            for _videoIDTuple in dbCurr:
-                videoID = _videoIDTuple[0]
-
-            # getting course ID
-            dbCurr.execute("SELECT id FROM Course WHERE name=?",
-                           (request.form['course'],))
-            for _courseIDTuple in dbCurr:
-                courseID = _courseIDTuple[0]
-
-            # insert new video in release table
-
-            ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            
-            dbCurr.execute("INSERT INTO flaskylearn.Release VALUES (?, ?, ?)",
-                           (session['email'], videoID, ts))
-
-            # insert new video in the course
-            dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",
-                           (videoID, courseID, int(request.form['lessonNum'])))
-            db.commit()
-
+    if request.method != 'POST':
         # getting the couses available
         courses = []
         dbCurr.execute("SELECT name FROM Course")
         for courseName in dbCurr:
             courses.append(courseName[0])
-        db.close()
         return render_template("dashboard.html", context=courses)
 
-    # if not authorized, forbidden
-    return abort(403)
+    # POST request = new video upload
+
+    # File checks
+    if 'video' not in request.files:
+        print('No file part')
+        return redirect(request.url)
+    file = request.files['video']
+
+    # handles unselected file
+    if file.filename == '':
+        print('No selected file')
+        return redirect(request.url)
+
+    # handles _ char
+    if '_' in file.filename:
+        print('Pls no underscores in filename uwu')
+        return redirect(request.url)
+
+    if file and util.allowedFile(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    else:
+        print("Non accepted extension")
+
+    description = request.form['description']
+
+    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    # insert new video in table
+    dbCurr.execute(
+        "INSERT INTO Video (description, path) VALUES (?, ?)", (description, path))
+
+    # getting video ID
+    dbCurr.execute(
+        "SELECT id FROM Video WHERE description=? AND path=?", (description, path))
+    for _videoIDTuple in dbCurr:
+        videoID = _videoIDTuple[0]
+
+    # getting course ID
+    dbCurr.execute("SELECT id FROM Course WHERE name=?",
+                   (request.form['course'],))
+    for _courseIDTuple in dbCurr:
+        courseID = _courseIDTuple[0]
+
+    # insert new video in release table
+
+    ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    dbCurr.execute("INSERT INTO flaskylearn.Release VALUES (?, ?, ?)",
+                   (session['email'], videoID, ts))
+
+    # insert new video in the course
+    dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",
+                   (videoID, courseID, int(request.form['lessonNum'])))
 
 
 @app.route("/courses/")
 def courses():
 
     # database connection
-    db = dbConnect()
     dbCurr = db.cursor()
     courses = []
 
@@ -300,7 +286,6 @@ def courses():
 def newCourse():
     authorized = False
     if 'email' in session:
-        db = dbConnect()
         dbCurr = db.cursor()
         dbCurr.execute(
             'SELECT email FROM Contributor WHERE email=?', (session['email'],))
@@ -309,23 +294,22 @@ def newCourse():
     else:
         return abort(403)
 
-    if authorized:
-        if request.method == 'POST':
-            name = request.form['name']
-            duration = request.form['time']
-            dbCurr.execute(
-                'INSERT INTO Course (name, duration) VALUES (?,?)', (name, duration))
-            db.commit()
-            db.close()
-            return redirect(url_for('dashboard'))
+    if not authorized:
+        return abort(403)
 
+    if request.method != 'POST':
         return render_template('newCourse.html')
-    return abort(403)
+
+    name = request.form['name']
+    duration = request.form['time']
+    dbCurr.execute(
+        'INSERT INTO Course (name, duration) VALUES (?,?)', (name, duration))
+    return redirect(url_for('dashboard'))
+
 
 
 @app.route('/quiz/')
 def quiz():
-    db = dbConnect()
     dbCurr = db.cursor()
     courses = {}
 

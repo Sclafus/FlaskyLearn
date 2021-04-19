@@ -26,3 +26,37 @@ VIDEO_FORMATS = "webm, mkv, flv, avi, mov, wmv, mp4, m4v, 3gp"
 Dependencies:
 - MariaDB
 - Python (3.9 is recommended)
+
+## Deployment with Docker
+TODO
+
+## Standard Deployment
+1. Install MariaDB and Python using your package manager.
+
+    - For Debian/Ubuntu based distros using `apt`
+
+      `sudo apt install -y mariadb-server python` //FIX 
+
+    - For Arch based distros using `pacman`
+
+      `sudo pacman -S mariadb python`
+
+    - For REHL/CentOS/Oracle Linux using `yum`
+
+      `sudo yum install -y mariadb python` //FIX
+
+2. Clone the repository
+
+    `git clone https://github.com/Sclafus/FlaskyLearn.git`
+
+3. Create a new user for your database using a strong password
+
+4. Create the database using the createDB.sql file
+
+5. Enable `mariadb.service` on startup with `systemd`
+
+6. Add a new Contributor using `addNewContributor.py`
+
+7. Start the Flask app and make sure everything is working
+
+8. Enable on startup
