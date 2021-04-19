@@ -1,4 +1,4 @@
-CREATE DATABASE `flaskylearn`;
+CREATE DATABASE IF NOT EXISTS `flaskylearn`;
 USE `flaskylearn`;
 
 CREATE TABLE `Contributor` (
@@ -29,8 +29,8 @@ CREATE TABLE `Student` (
 
 CREATE TABLE `Release` (
   `email` varchar(64),
-  `id` int,
-  `timestamp` bigint UNSIGNED DEFAULT null,
+  `id` int, 
+  `timestamp` timestamp, 
   PRIMARY KEY (`email`, `id`)
 );
 
@@ -44,14 +44,14 @@ CREATE TABLE `Composition` (
 CREATE TABLE `Enrollment` (
   `email` varchar(64),
   `id` int,
-  `timestamp` bigint UNSIGNED DEFAULT null,
+  `timestamp` timestamp DEFAULT null,
   PRIMARY KEY (`email`, `id`)
 );
 
 CREATE TABLE `Visualization` (
   `email` varchar(64),
   `id` int,
-  `timestamp` bigint UNSIGNED,
+  `timestamp` timestamp,
   PRIMARY KEY (`email`, `id`, `timestamp`)
 );
 
