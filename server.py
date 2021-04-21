@@ -10,7 +10,7 @@ from courses.courses import courses
 
 # loading .env file
 load_dotenv()
-secretKey = os.getenv("SECRET_KEY")
+secretKey = os.getenv('SECRET_KEY')
 
 # .env allocation
 env = {
@@ -36,46 +36,40 @@ util = Utils(env)
 
 @app.errorhandler(403)
 def forbidden(e):
-    '''
-    Error page for 403 forbidden http error
-    '''
-    return render_template("403.html"), 403
+    '''Error page for 403 forbidden http error'''
+    return render_template('403.html'), 403
 
 
 @app.errorhandler(404)
 def not_found(e):
-    '''
-    Error page for 404 not found http error
-    '''
+    '''Error page for 404 not found http error'''
     return render_template('404.html'), 404
 
 
 db = util.dbConnect()
 
 
-@app.route("/")
+@app.route('/')
 def home():
-    '''
-    Renders the homepage template
-    '''
-    return render_template("index.html")
+    '''Renders the homepage template'''
+    return render_template('index.html')
 
 
-@app.route("/login/", methods=["POST", "GET"])
+@app.route('/login/', methods=['POST', 'GET'])
 def login():
     '''Redirects to login.html. Handles POST requests to login users'''
 
     # NOT a post request, returning login page
-    if request.method != "POST":
-        return render_template("login.html")
+    if request.method != 'POST':
+        return render_template('login.html')
 
     # POST Request = login attempt
-    email = request.form["email"]
-    password = request.form["password"]
+    email = request.form['email']
+    password = request.form['password']
 
     # handling unchecked "Remember me" option
     try:
-        stayLogged = request.form["stayLogged"]
+        stayLogged = request.form['stayLogged']
         if stayLogged:
             app.permanent_session_lifetime = timedelta(days=1000)
 
@@ -100,31 +94,31 @@ def login():
             hasResult = True
             if passwd == hhpass:
                 # both password and email are valid, logging in
-                session["email"] = hhmail
-                session["name"] = name
+                session['email'] = hhmail
+                session['name'] = name
                 print(f"User with email {hhmail} logged in successfully")
-                return redirect(url_for("home"))
+                return redirect(url_for('home'))
 
             # email is right, password is wrong, flashing message
-            flash("Wrong password")
+            flash('Wrong password')
 
     # user not registered
     if not hasResult:
-        flash("You are not registered")
+        flash('You are not registered')
 
 
-@app.route("/register/", methods=["POST", "GET"])
+@app.route('/register/', methods=['POST', 'GET'])
 def register():
     '''Register to the Student table'''
 
-    if request.method != "POST":
-        return render_template("register.html")
+    if request.method != 'POST':
+        return render_template('register.html')
 
     # get data from form
-    name = request.form["name"]
-    surname = request.form["surname"]
-    email = request.form["email"]
-    password = request.form["password"]
+    name = request.form['name']
+    surname = request.form['surname']
+    email = request.form['email']
+    password = request.form['password']
 
     # double hash password and mail
     hhmail = util.doubleHash(email)
@@ -142,20 +136,20 @@ def register():
     if not alreadyRegistered:
         dbCurr.execute(
             "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, util.doubleHash(password), name, surname))
-        return redirect(url_for("home"))
+        return redirect(url_for('home'))
 
     # flashing message if the email is already present
-    flash("This email has already been used.")
+    flash('This email has already been used.')
 
 
-@app.route("/logout/")
+@app.route('/logout/')
 def logout():
     ''' Deletes all the session data'''
     session.clear()
-    return redirect(url_for("home"))
+    return redirect(url_for('home'))
 
 
-@app.route("/dashboard/", methods=['POST', 'GET'])
+@app.route('/dashboard/', methods=['POST', 'GET'])
 def dashboard():
     '''Displays the dashboard only for authorized users (aka contributors)'''
 
@@ -183,7 +177,7 @@ def dashboard():
         dbCurr.execute("SELECT name FROM Course")
         for courseName in dbCurr:
             courses.append(courseName[0])
-        return render_template("dashboard.html", context=courses)
+        return render_template('dashboard.html', context=courses)
 
     # POST request = new video upload
 
@@ -207,7 +201,7 @@ def dashboard():
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     else:
-        print("Non accepted extension")
+        print('Non accepted extension')
 
     description = request.form['description']
 
@@ -293,4 +287,4 @@ def quiz():
 
 
 if __name__ == '__main__':
-    app.run(threaded=True)
+    app.run(debug=True, threaded=True)

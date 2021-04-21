@@ -8,9 +8,7 @@ class Utils:
 
 
     def doubleHash(self, toBeHashed: str) -> str:
-        '''
-        return the double hash of the input string
-        '''
+        '''Return the double hash of the input string'''
         return SHA3_256.new((SHA3_256.new(toBeHashed.encode()).hexdigest()).encode()).hexdigest()
 
 

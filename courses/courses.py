@@ -21,7 +21,7 @@ db = utils.dbConnect()
 
 @courses.route('/')
 def homepage():
-    # database connection
+    '''courses homepage, card style'''
     dbCurr = db.cursor()
     courses = []
 
@@ -31,3 +31,7 @@ def homepage():
         courses.append((courseName, courseDuration))
 
     return render_template('courses.html', context=courses)
+
+@courses.route('/<courseName>')
+def course(courseName):
+    pass
