@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import mariadb
 import os
 from utils import Utils
+from courses.courses import courses
 
 # loading .env file
 load_dotenv()
@@ -26,28 +27,8 @@ env = {
 app = Flask(__name__)
 app.secret_key = SHA3_256.new(secretKey.encode()).hexdigest()
 app.config['UPLOAD_FOLDER'] = env['uploadFolder']
+app.register_blueprint(courses, url_prefix='/courses')
 util = Utils(env)
-
-
-def dbConnect():
-    '''
-    Returns connection to the local database object
-    '''
-    try:
-        conn = mariadb.connect(
-            user=env['dbUser'],
-            password=env['dbPassword'],
-            host=env['dbHost'],
-            port=env['dbPort'],
-            database=env['dbSchema'],
-            autocommit=True
-        )
-        return conn
-
-    except mariadb.Error as e:
-        print(f"Error connecting to MariaDB Platform: {e}")
-        raise Exception
-    return None
 
 
 # Error handlers
@@ -69,7 +50,7 @@ def not_found(e):
     return render_template('404.html'), 404
 
 
-db = dbConnect()
+db = util.dbConnect()
 
 
 @app.route("/")
@@ -82,10 +63,7 @@ def home():
 
 @app.route("/login/", methods=["POST", "GET"])
 def login():
-    '''
-    Redirects to login.html 
-    Handles POST requests to login users
-    '''
+    '''Redirects to login.html. Handles POST requests to login users'''
 
     # NOT a post request, returning login page
     if request.method != "POST":
@@ -137,14 +115,12 @@ def login():
 
 @app.route("/register/", methods=["POST", "GET"])
 def register():
-    '''
-    Register to the Student table
-    '''
+    '''Register to the Student table'''
 
     if request.method != "POST":
         return render_template("register.html")
 
-        # get data from form
+    # get data from form
     name = request.form["name"]
     surname = request.form["surname"]
     email = request.form["email"]
@@ -174,9 +150,7 @@ def register():
 
 @app.route("/logout/")
 def logout():
-    ''' 
-    Deletes all the session data
-    '''
+    ''' Deletes all the session data'''
     session.clear()
     return redirect(url_for("home"))
 
@@ -267,23 +241,9 @@ def dashboard():
                    (videoID, courseID, int(request.form['lessonNum'])))
 
 
-@app.route("/courses/")
-def courses():
-
-    # database connection
-    dbCurr = db.cursor()
-    courses = []
-
-    # checks if user is authenticated
-    dbCurr.execute("SELECT name, duration FROM Course")
-    for courseName, courseDuration in dbCurr:
-        courses.append((courseName, courseDuration))
-
-    return render_template('courses.html', context=courses)
-
-
 @app.route('/newCourse/', methods=['POST', 'GET'])
 def newCourse():
+    '''Adds new course to the database'''
     authorized = False
     if 'email' in session:
         dbCurr = db.cursor()
@@ -305,7 +265,6 @@ def newCourse():
     dbCurr.execute(
         'INSERT INTO Course (name, duration) VALUES (?,?)', (name, duration))
     return redirect(url_for('dashboard'))
-
 
 
 @app.route('/quiz/')
