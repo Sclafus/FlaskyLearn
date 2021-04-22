@@ -17,6 +17,7 @@ CREATE TABLE `Video` (
 CREATE TABLE `Course` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) DEFAULT null,
+  `description` text DEFAULT null,
   `duration` int  UNSIGNED DEFAULT null
 );
 
