@@ -31,4 +31,20 @@ p {
 .margin {
   margin: 0 1vw;
 }
+
+.card-deck {
+  width: 98vw;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+  margin-left: 1vw;
+  margin-right: 1vw;
+}
+
+.card-title {
+  color: #d4d4d4;
+}
+
+.text-muted .card-subtitle {
+  color: #8c8c8c;
+}
 /*# sourceMappingURL=style.css.map */

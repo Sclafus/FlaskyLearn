@@ -1,4 +1,5 @@
 $background: hsl(0, 0%, 17%);
+$text-muted: hsl(0, 0%, 55%);
 $text-color: hsl(0, 0%, 83%);
 
 .navbar-logo {
@@ -28,4 +29,16 @@ p {
 }
 .margin {
   margin: 0 1vw;
+}
+.card-deck {
+  width: 98vw;
+  flex-wrap: wrap;
+  margin-left: 1vw;
+  margin-right: 1vw;
+}
+.card-title {
+  color: $text-color;
+}
+.text-muted .card-subtitle{
+  color: $text-muted;
 }

@@ -26,12 +26,12 @@ def homepage():
     courses = []
 
     # checks if user is authenticated
-    dbCurr.execute("SELECT name, duration FROM Course")
-    for courseName, courseDuration in dbCurr:
-        courses.append((courseName, courseDuration))
-
+    dbCurr.execute("SELECT name, duration, description FROM Course")
+    for name, duration, description in dbCurr:
+        courses.append((name, duration, description))
     return render_template('courses.html', context=courses)
 
 @courses.route('/<courseName>')
 def course(courseName):
-    pass
+    '''Page for a specified course, dinamically generated'''
+    return render_template('course.html', context=courseName)
