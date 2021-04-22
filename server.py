@@ -256,8 +256,9 @@ def newCourse():
 
     name = request.form['name']
     duration = request.form['time']
+    description = request.form['description']
     dbCurr.execute(
-        'INSERT INTO Course (name, duration) VALUES (?,?)', (name, duration))
+        'INSERT INTO Course (name, duration, description) VALUES (?, ?, ?)', (name, duration, description))
     return redirect(url_for('dashboard'))
 
 
@@ -287,4 +288,4 @@ def quiz():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True)
+    app.run(threaded=True)
