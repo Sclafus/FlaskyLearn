@@ -1,9 +1,22 @@
-from server import dbConnect, doubleHash
+from utils import Utils
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+env = {
+    'dbUser': os.getenv('DB_USER'),
+    'dbPassword': os.getenv('DB_PASSWORD'),
+    'dbHost': os.getenv('DB_HOST'),
+    'dbPort': int(os.getenv('DB_PORT')),
+    'dbSchema': os.getenv('DB_SCHEMA'),
+    'uploadFolder': os.getenv('UPLOAD_FOLDER'),
+    'videoFormats': os.getenv('VIDEO_FORMATS').split(', '),
+}
 
 def main():
     #connects to database 
-    db = dbConnect()
+    util = Utils(env)
+    db = util.dbConnect()
     dbCurr = db.cursor()
 
     #gather information from the user
@@ -13,9 +26,9 @@ def main():
     password = input("Insert the password of the new contributor: ")
 
     #hashing the sensitive informations
-    hhmail = doubleHash(email)
-    hhpassword = doubleHash(password)
-    hhsurname = doubleHash(surname)
+    hhmail = util.doubleHash(email)
+    hhpassword = util.doubleHash(password)
+    hhsurname = util.doubleHash(surname)
 
     #add contributor manually
     dbCurr.execute("INSERT INTO Contributor (email, password, name, surname) VALUES (?, ?, ?, ?)",
