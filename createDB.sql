@@ -1,55 +1,55 @@
 CREATE DATABASE IF NOT EXISTS `flaskylearn`;
 USE `flaskylearn`;
 
-CREATE TABLE `Contributor` (
+CREATE TABLE IF NOT EXISTS `Contributor` (
   `email` varchar(64) PRIMARY KEY,
   `name` varchar(255) DEFAULT null,
   `surname` varchar(64) DEFAULT null,
   `password` varchar(64) DEFAULT null
 );
 
-CREATE TABLE `Video` (
+CREATE TABLE IF NOT EXISTS  `Video` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `description` text DEFAULT null,
   `path` varchar(255) DEFAULT null
 );
 
-CREATE TABLE `Course` (
+CREATE TABLE IF NOT EXISTS  `Course` (
   `id` int PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(255) DEFAULT null,
   `description` text DEFAULT null,
   `duration` int  UNSIGNED DEFAULT null
 );
 
-CREATE TABLE `Student` (
+CREATE TABLE IF NOT EXISTS  `Student` (
   `email` varchar(64) PRIMARY KEY,
   `name` varchar(255) DEFAULT null,
   `surname` varchar(255) DEFAULT null,
   `password` varchar(64) DEFAULT null
 );
 
-CREATE TABLE `Release` (
+CREATE TABLE IF NOT EXISTS  `Release` (
   `email` varchar(64),
   `id` int, 
   `timestamp` timestamp, 
   PRIMARY KEY (`email`, `id`)
 );
 
-CREATE TABLE `Composition` (
+CREATE TABLE IF NOT EXISTS  `Composition` (
   `videoid` int,
   `courseid` int,
   `lesson` int DEFAULT null,
   PRIMARY KEY (`videoid`, `courseid`)
 );
 
-CREATE TABLE `Enrollment` (
+CREATE TABLE IF NOT EXISTS  `Enrollment` (
   `email` varchar(64),
   `id` int,
-  `timestamp` timestamp DEFAULT null,
+  `timestamp` timestamp,
   PRIMARY KEY (`email`, `id`)
 );
 
-CREATE TABLE `Visualization` (
+CREATE TABLE IF NOT EXISTS  `Visualization` (
   `email` varchar(64),
   `id` int,
   `timestamp` timestamp,
