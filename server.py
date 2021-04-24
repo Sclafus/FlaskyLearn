@@ -3,39 +3,39 @@ from werkzeug.utils import secure_filename
 from datetime import timedelta, datetime
 from Crypto.Hash import SHA3_256
 from dotenv import load_dotenv
-import mariadb
-import os
+from os import getenv, listdir
+from os.path import join, isfile
 from utils import Utils
 from courses.courses import courses
 from errors.errors import errors
 
 # loading .env file
 load_dotenv()
-secretKey = os.getenv('SECRET_KEY')
+secretKey = getenv('SECRET_KEY')
 
 # .env allocation
 env = {
-    'dbUser': os.getenv('DB_USER'),
-    'dbPassword': os.getenv('DB_PASSWORD'),
-    'dbHost': os.getenv('DB_HOST'),
-    'dbPort': int(os.getenv('DB_PORT')),
-    'dbSchema': os.getenv('DB_SCHEMA'),
-    'uploadFolder': os.getenv('UPLOAD_FOLDER'),
-    'videoFormats': os.getenv('VIDEO_FORMATS').split(', '),
+    'dbUser': getenv('DB_USER'),
+    'dbPassword': getenv('DB_PASSWORD'),
+    'dbHost': getenv('DB_HOST'),
+    'dbPort': int(getenv('DB_PORT')),
+    'dbSchema': getenv('DB_SCHEMA'),
+    'uploadFolder': getenv('UPLOAD_FOLDER'),
+    'videoFormats': getenv('VIDEO_FORMATS').split(', '),
 }
 
 # Flask inizialization
 app = Flask(__name__)
 app.secret_key = SHA3_256.new(secretKey.encode()).hexdigest()
 
-#upload folder for videos
+# upload folder for videos
 app.config['UPLOAD_FOLDER'] = env['uploadFolder']
 
-#blueprints initialization
+# blueprints initialization
 app.register_blueprint(courses, url_prefix='/courses')
 app.register_blueprint(errors)
 
-#utils obj and db connection
+# utils obj and db connection
 util = Utils(env)
 db = util.dbConnect()
 
@@ -98,6 +98,8 @@ def login():
     # user not registered
     if not hasResult:
         flash('You are not registered')
+    
+    return redirect(request.url)
 
 
 @app.route('/register/', methods=['POST', 'GET'])
@@ -133,7 +135,7 @@ def register():
 
     # flashing message if the email is already present
     flash('This email has already been used.')
-
+    return redirect(request.url)
 
 @app.route('/logout/')
 def logout():
@@ -176,29 +178,34 @@ def dashboard():
 
     # File checks
     if 'video' not in request.files:
-        print('No file part')
         return redirect(request.url)
     file = request.files['video']
 
     # handles unselected file
     if file.filename == '':
-        print('No selected file')
+        flash('No file selected')
         return redirect(request.url)
 
     # handles _ char
     if '_' in file.filename:
-        print('Pls no underscores in filename uwu')
+        flash('Please do not include _ in your file name')
         return redirect(request.url)
 
     if file and util.allowedFile(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        path = join(app.config['UPLOAD_FOLDER'], filename)
+        files = [f for f in listdir(app.config['UPLOAD_FOLDER']) if isfile(
+            join(app.config['UPLOAD_FOLDER'], f))]
+
+        # checks if the file is already present in the filesystem
+        if filename not in files:
+            file.save(path)
+        else:
+            flash('There is already a file with this name, please rename it')
     else:
-        print('Non accepted extension')
+        flash('The extension of the file is not allowed.')
 
     description = request.form['description']
-
-    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
     # insert new video in table
     dbCurr.execute(
@@ -226,6 +233,8 @@ def dashboard():
     # insert new video in the course
     dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",
                    (videoID, courseID, int(request.form['lessonNum'])))
+    
+    return redirect(request.url)
 
 
 @app.route('/newCourse/', methods=['POST', 'GET'])
