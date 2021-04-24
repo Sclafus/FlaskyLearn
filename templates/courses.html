@@ -6,10 +6,10 @@
   {% for course in context: %}
   <div class="card bg-dark" style="width: 15vw;">
     <div class="card-body">
-      <h5 class="card-title">{{course[0]}}</h5>
-      <h6 class="card-subtitle mb-2 text-muted">Duration: {{course[1]}} hours</h6>
+      <h5 class="card-title">{{course[1]}}</h5>
+      <h6 class="card-subtitle mb-2 text-muted">Duration: {{course[3]}} hours</h6>
       <p class="card-text">{{course[2]}}</p>
-      <a href="#" class="card-link">Open</a>
+      <a href="{{ url_for('courses.specificCourse', courseId=course[0])}}" class="card-link">Open</a>
     </div>
   </div>
   {% endfor %}
