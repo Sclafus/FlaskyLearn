@@ -7,6 +7,7 @@ import mariadb
 import os
 from utils import Utils
 from courses.courses import courses
+from errors.errors import errors
 
 # loading .env file
 load_dotenv()
@@ -26,26 +27,16 @@ env = {
 # Flask inizialization
 app = Flask(__name__)
 app.secret_key = SHA3_256.new(secretKey.encode()).hexdigest()
+
+#upload folder for videos
 app.config['UPLOAD_FOLDER'] = env['uploadFolder']
+
+#blueprints initialization
 app.register_blueprint(courses, url_prefix='/courses')
+app.register_blueprint(errors)
+
+#utils obj and db connection
 util = Utils(env)
-
-
-# Error handlers
-
-
-@app.errorhandler(403)
-def forbidden(e):
-    '''Error page for 403 forbidden http error'''
-    return render_template('403.html'), 403
-
-
-@app.errorhandler(404)
-def not_found(e):
-    '''Error page for 404 not found http error'''
-    return render_template('404.html'), 404
-
-
 db = util.dbConnect()
 
 
@@ -245,10 +236,8 @@ def newCourse():
             'SELECT email FROM Contributor WHERE email=?', (session['email'],))
         for _ in dbCurr:
             authorized = True
-    else:
-        return abort(403)
 
-    if not authorized:
+    if ((not authorized) or ('email' not in session)):
         return abort(403)
 
     if request.method != 'POST':
