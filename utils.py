@@ -16,7 +16,7 @@ class Utils:
         '''Checks if the file is currently being accepted to upload'''
 
         ext = filename.split(".")[-1]
-        if ext in self.env['videoFormats']:
+        if ext in self._env['videoFormats']:
             return True
         return False
 
