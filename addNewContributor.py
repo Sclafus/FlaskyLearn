@@ -33,7 +33,6 @@ def main():
     #add contributor manually
     dbCurr.execute("INSERT INTO Contributor (email, password, name, surname) VALUES (?, ?, ?, ?)",
     (hhmail, hhpassword, name, hhsurname))
-    db.commit()
     db.close()
     
 
