@@ -11,3 +11,8 @@ def forbidden(e):
 def not_found(e):
     '''Error page for 404 not found http error'''
     return render_template('errors/404.html'), 404
+
+@errors.app_errorhandler(500)
+def not_found(e):
+    '''Error page for 500 internal server http error'''
+    return render_template('errors/500.html'), 500
