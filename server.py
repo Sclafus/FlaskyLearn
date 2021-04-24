@@ -41,6 +41,8 @@ db = util.dbConnect()
 
 
 @app.route('/')
+@courses.route('/home')
+@courses.route('/homepage')
 def home():
     '''Renders the homepage template'''
     return render_template('index.html')
@@ -218,7 +220,7 @@ def dashboard():
 
     ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    dbCurr.execute("INSERT INTO flaskylearn.Release VALUES (?, ?, ?)",
+    dbCurr.execute(f"INSERT INTO {env['dbSchema']}.Release VALUES (?, ?, ?)",
                    (session['email'], videoID, ts))
 
     # insert new video in the course
