@@ -26,7 +26,7 @@ def specificCourse(courseId: int):
     videos = []
 
     dbCurr.execute(
-        "SELECT lesson, description FROM Composition INNER JOIN Video WHERE Composition.courseid = ?", (courseId,))
+        "SELECT DISTINCT lesson, description FROM Composition INNER JOIN Video ON Video.id = Composition.videoid WHERE Composition.courseid = ?", (courseId,))
 
     for elem in dbCurr:
         print(elem)
