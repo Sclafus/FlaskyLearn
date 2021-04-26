@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0 shrink-to-fit=no">
 
   <!-- bootstrap script-->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -43,21 +43,6 @@
       <li class="nav-item">
         <a class="nav-link" id='nav-el2' href="{{ url_for('register') }}">Register</a>
       </li>
-
-      <!-- Username goes here -->
-      <li class="nav-item">
-        <!-- <a class="nav-link" id='nav-el3' href="#"></a> -->
-      </li>
-      <!-- <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Dropdown link
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-          <a class="dropdown-item" href="#">Action</a>
-          <a class="dropdown-item" href="#">Another action</a>
-          <a class="dropdown-item" href="#">Something else here</a>
-        </div>
-      </li> -->
     </ul>
   </div>
 </nav>
@@ -66,6 +51,6 @@
   {% block content %}
   {% endblock %}
 </body>
-{% block scripts%}{% endblock %}
-
+{% block scripts%}
+{% endblock %}
 </html>

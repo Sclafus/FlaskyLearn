@@ -1,24 +1,7 @@
 from flask import Blueprint, render_template, request
-from utils import Utils
-from dotenv import load_dotenv
-from os import getenv
+from flaskylearn import db, util
 courses = Blueprint("courses", __name__,
                     static_folder='static', template_folder='templates')
-
-# .env allocation
-load_dotenv()
-env = {
-    'dbUser': getenv('DB_USER'),
-    'dbPassword': getenv('DB_PASSWORD'),
-    'dbHost': getenv('DB_HOST'),
-    'dbPort': int(getenv('DB_PORT')),
-    'dbSchema': getenv('DB_SCHEMA'),
-    'uploadFolder': getenv('UPLOAD_FOLDER'),
-    'videoFormats': getenv('VIDEO_FORMATS').split(', '),
-}
-
-utils = Utils(env)
-db = utils.dbConnect()
 
 
 @courses.route('/')

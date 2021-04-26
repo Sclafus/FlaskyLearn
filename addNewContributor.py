@@ -1,22 +1,21 @@
-from utils import Utils
+from flaskylearn import db, util
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-env = {
-    'dbUser': os.getenv('DB_USER'),
-    'dbPassword': os.getenv('DB_PASSWORD'),
-    'dbHost': os.getenv('DB_HOST'),
-    'dbPort': int(os.getenv('DB_PORT')),
-    'dbSchema': os.getenv('DB_SCHEMA'),
-    'uploadFolder': os.getenv('UPLOAD_FOLDER'),
-    'videoFormats': os.getenv('VIDEO_FORMATS').split(', '),
-}
+# load_dotenv()
+# env = {
+#     'dbUser': os.getenv('DB_USER'),
+#     'dbPassword': os.getenv('DB_PASSWORD'),
+#     'dbHost': os.getenv('DB_HOST'),
+#     'dbPort': int(os.getenv('DB_PORT')),
+#     'dbSchema': os.getenv('DB_SCHEMA'),
+#     'uploadFolder': os.getenv('UPLOAD_FOLDER'),
+#     'videoFormats': os.getenv('VIDEO_FORMATS').split(', '),
+# }
 
 def main():
     #connects to database 
-    util = Utils(env)
-    db = util.dbConnect()
+    # db = util.dbConnect()
     dbCurr = db.cursor()
 
     #gather information from the user

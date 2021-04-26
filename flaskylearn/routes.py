@@ -1,48 +1,13 @@
-from flask import Flask, redirect, url_for, render_template, request, session, flash, abort
+from flask import render_template, request, redirect, url_for, flash, session, abort
+from flaskylearn import db, util, app, env
+from datetime import datetime, timedelta
 from werkzeug.utils import secure_filename
-from datetime import timedelta, datetime
-from Crypto.Hash import SHA3_256
-from dotenv import load_dotenv
-from os import getenv, listdir
 from os.path import join, isfile
-from utils import Utils
-from courses.courses import courses
-from errors.errors import errors
+from os import listdir
 
-# loading .env file
-load_dotenv()
-secretKey = getenv('SECRET_KEY')
-
-# .env allocation
-env = {
-    'dbUser': getenv('DB_USER'),
-    'dbPassword': getenv('DB_PASSWORD'),
-    'dbHost': getenv('DB_HOST'),
-    'dbPort': int(getenv('DB_PORT')),
-    'dbSchema': getenv('DB_SCHEMA'),
-    'uploadFolder': getenv('UPLOAD_FOLDER'),
-    'videoFormats': getenv('VIDEO_FORMATS').split(', '),
-}
-
-# Flask inizialization
-app = Flask(__name__)
-app.secret_key = SHA3_256.new(secretKey.encode()).hexdigest()
-
-# upload folder for videos
-app.config['UPLOAD_FOLDER'] = env['uploadFolder']
-
-# blueprints initialization
-app.register_blueprint(courses, url_prefix='/courses')
-app.register_blueprint(errors)
-
-# utils obj and db connection
-util = Utils(env)
-db = util.dbConnect()
-
-
+@app.route('/home')
+@app.route('/homepage')
 @app.route('/')
-@courses.route('/home')
-@courses.route('/homepage')
 def home():
     '''Renders the homepage template'''
     return render_template('index.html')
@@ -285,7 +250,3 @@ def quiz():
             enrolled.append(courses[courseID])
 
     return render_template('quiz.html', context=enrolled)
-
-
-if __name__ == '__main__':
-    app.run(threaded=True)

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %} {{courseName}} - Lesson {{lessonId}} {% endblock %}
+{% block content %}
+<video controls src="{{url_for(folderPath, filename=videoPath)}}">
+    If you see this message, please updateyour browser!
+</video>
+{% endblock %}
