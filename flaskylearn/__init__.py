@@ -34,7 +34,9 @@ db = util.dbConnect()
 from flaskylearn import routes
 from courses.courses import courses
 from errors.errors import errors
+from dashboard.dashboard import dashboard
 
 # blueprints initialization
 app.register_blueprint(courses, url_prefix='/courses')
+app.register_blueprint(dashboard, url_prefix='/dashboard')
 app.register_blueprint(errors)
