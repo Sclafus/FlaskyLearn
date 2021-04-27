@@ -56,6 +56,30 @@ CREATE TABLE IF NOT EXISTS `Visualization` (
   PRIMARY KEY (`email`, `id`, `timestamp`)
 );
 
+CREATE TABLE IF NOT EXISTS `Test` (
+  `courseid` int,
+  `question` int,
+  `weight` float DEFAULT 1,
+  PRIMARY KEY(`courseid`, `question`)
+);
+
+CREATE TABLE IF NOT EXISTS `Question` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `topic` text DEFAULT null
+);
+
+CREATE TABLE IF NOT EXISTS `Answer` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `topic` text DEFAULT null
+);
+
+CREATE TABLE IF NOT EXISTS `MadeUp` (
+  `questionid` int,
+  `answerid` int,
+  `correct` boolean,
+  PRIMARY KEY(`questionid`, `answerid`)
+);
+
 ALTER TABLE `Release` ADD FOREIGN KEY (`email`) REFERENCES `Contributor` (`email`);
 ALTER TABLE `Release` ADD FOREIGN KEY (`id`) REFERENCES `Video` (`id`);
 ALTER TABLE `Composition` ADD FOREIGN KEY (`videoid`) REFERENCES `Video` (`id`);
@@ -64,3 +88,7 @@ ALTER TABLE `Enrollment` ADD FOREIGN KEY (`email`) REFERENCES `Student` (`email`
 ALTER TABLE `Enrollment` ADD FOREIGN KEY (`id`) REFERENCES `Course` (`id`);
 ALTER TABLE `Visualization` ADD FOREIGN KEY (`email`) REFERENCES `Student` (`email`);
 ALTER TABLE `Visualization` ADD FOREIGN KEY (`id`) REFERENCES `Video` (`id`);
+ALTER TABLE `Test` ADD FOREIGN KEY (`courseid`) REFERENCES `Course` (`id`);
+ALTER TABLE `Test` ADD FOREIGN KEY (`question`) REFERENCES `Question` (`id`);
+ALTER TABLE `MadeUp` ADD FOREIGN KEY (`questionid`) REFERENCES `Question` (`id`);
+ALTER TABLE `MadeUp` ADD FOREIGN KEY (`answerid`) REFERENCES `Answer` (`id`);

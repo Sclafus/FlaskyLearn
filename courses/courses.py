@@ -54,6 +54,13 @@ def specificLesson(courseId: int, lessonId: int):
         path = _path[0].split('/')
         videoPath = '/'.join(path[2:])
         folderPath = path[1]
-        print(f"video path: {videoPath}\n folder path: {folderPath}")
 
     return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath)
+
+
+@courses.route('/<int:courseId>/quiz', methods=['POST', 'GET'])
+def specificQuiz(courseId: int):
+    '''Quiz for the specified course'''
+    pass
+    # dbCurr = db.cursor()
+    # dbCurr.execute("SELECT * FROM Test INNER JOIN Question ON Test.question = Question.id INNER JOIN MadeUp ON ")
