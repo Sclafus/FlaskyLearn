@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, abort, redirect, flash,url_for
+from flask import Blueprint, render_template, request, session, abort, redirect, flash, url_for
 from werkzeug.utils import secure_filename
 from flaskylearn import db, util, app
 
@@ -7,7 +7,8 @@ from os import listdir
 from datetime import datetime
 
 dashboard = Blueprint("dashboard", __name__,
-                    static_folder='static', template_folder='templates')
+                      static_folder='static', template_folder='templates')
+
 
 @dashboard.route('/', methods=['POST', 'GET'])
 def homepage():
@@ -98,10 +99,11 @@ def homepage():
     # insert new video in the course
     dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",
                    (videoID, courseID, int(request.form['lessonNum'])))
-    
+
     return redirect(request.url)
 
-@dashboard.route('/newCourse/', methods=['POST', 'GET'])
+
+@dashboard.route('/newCourse', methods=['POST', 'GET'])
 def newCourse():
     '''Adds new course to the database'''
     authorized = False
@@ -123,4 +125,16 @@ def newCourse():
     description = request.form['description']
     dbCurr.execute(
         'INSERT INTO Course (name, duration, description) VALUES (?, ?, ?)', (name, duration, description))
-    return redirect(url_for('homepage'))
+    return redirect(url_for('dashboard.homepage'))
+
+
+@dashboard.route('/newQuiz', methods=['POST', 'GET'])
+def newQuiz():
+    '''returns the page where you can assemble the questions for a definied course'''
+    return render_template('dashboard/newQuiz.html')
+
+
+@dashboard.route('/newQuestion', methods=['POST', 'GET'])
+def newQuestion():
+    '''returns the page where you can add new questions and answers'''
+    return render_template('dashboard/newQuestion.html')
