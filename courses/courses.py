@@ -29,7 +29,6 @@ def specificCourse(courseId: int):
         "SELECT DISTINCT lesson, description FROM Composition INNER JOIN Video ON Video.id = Composition.videoid WHERE Composition.courseid = ?", (courseId,))
 
     for elem in dbCurr:
-        print(elem)
         videos.append(elem)
 
     return render_template('courses/course.html', videos=videos, courseId=courseId)
@@ -50,6 +49,7 @@ def specificLesson(courseId: int, lessonId: int):
     dbCurr.execute(
         "SELECT path FROM Composition INNER JOIN Video on Composition.videoid = Video.id WHERE videoid = ? AND courseid=?", (lessonId, courseId))
 
+    #TODO bad paths
     for _path in dbCurr:
         path = _path[0].split('/')
         videoPath = '/'.join(path[2:])
