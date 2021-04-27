@@ -1,16 +1,15 @@
 import mariadb
 from Crypto.Hash import SHA3_256
 
+
 class Utils:
 
     def __init__(self, env: dict):
         self._env = env
 
-
     def doubleHash(self, toBeHashed: str) -> str:
         '''Return the double hash of the input string'''
         return SHA3_256.new((SHA3_256.new(toBeHashed.encode()).hexdigest()).encode()).hexdigest()
-
 
     def allowedFile(self, filename: str) -> bool:
         '''Checks if the file is currently being accepted to upload'''
@@ -38,3 +37,7 @@ class Utils:
             print(f"Error connecting to MariaDB Platform: {e}")
             raise Exception
         return None
+
+    def getEnv(self) -> dict:
+        '''Returns the env'''
+        return self._env
