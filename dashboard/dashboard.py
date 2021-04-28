@@ -66,6 +66,7 @@ def homepage():
         # checks if the file is already present in the filesystem
         if filename not in files:
             file.save(path)
+            newFile = True
         else:
             flash('There is already a file with this name, please rename it')
     else:
@@ -73,32 +74,33 @@ def homepage():
 
     description = request.form['description']
 
-    # insert new video in table
-    dbCurr.execute(
-        "INSERT INTO Video (description, path) VALUES (?, ?)", (description, path))
+    if newFile:
+        # insert new video in table
+        dbCurr.execute(
+            "INSERT INTO Video (description, path) VALUES (?, ?)", (description, path))
 
-    # getting video ID
-    dbCurr.execute(
-        "SELECT id FROM Video WHERE description=? AND path=?", (description, path))
-    for _videoIDTuple in dbCurr:
-        videoID = _videoIDTuple[0]
+        # getting video ID
+        dbCurr.execute(
+            "SELECT id FROM Video WHERE description=? AND path=?", (description, path))
+        for _videoIDTuple in dbCurr:
+            videoID = _videoIDTuple[0]
 
-    # getting course ID
-    dbCurr.execute("SELECT id FROM Course WHERE name=?",
-                   (request.form['course'],))
-    for _courseIDTuple in dbCurr:
-        courseID = _courseIDTuple[0]
+        # getting course ID
+        dbCurr.execute("SELECT id FROM Course WHERE name=?",
+                    (request.form['course'],))
+        for _courseIDTuple in dbCurr:
+            courseID = _courseIDTuple[0]
 
-    # insert new video in release table
+        # insert new video in release table
 
-    ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    dbCurr.execute(f"INSERT INTO {util.getEnv()['dbSchema']}.Release VALUES (?, ?, ?)",
-                   (session['email'], videoID, ts))
+        dbCurr.execute(f"INSERT INTO {util.getEnv()['dbSchema']}.Release VALUES (?, ?, ?)",
+                    (session['email'], videoID, ts))
 
-    # insert new video in the course
-    dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",
-                   (videoID, courseID, int(request.form['lessonNum'])))
+        # insert new video in the course
+        dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",
+                    (videoID, courseID, int(request.form['lessonNum'])))
 
     return redirect(request.url)
 
