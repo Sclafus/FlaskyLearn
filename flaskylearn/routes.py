@@ -94,7 +94,8 @@ def register():
     if not alreadyRegistered:
         dbCurr.execute(
             "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, util.doubleHash(password), name, surname))
-        return redirect(url_for('home'))
+        flash("You have been registered. You can now login!", category='success')
+        return redirect(url_for('login'))
 
     # flashing message if the email is already present
     flash('This email has already been used.')
