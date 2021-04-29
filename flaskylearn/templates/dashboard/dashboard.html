@@ -1,24 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<br>
-{% with messages = get_flashed_messages() %}
-{% if messages %}
-{% for msg in messages%}
-<div class="alert alert-warning alert-dismissible fade show margin" role="alert">
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-  <strong>{{msg}}</strong>
-</div>
-{% endfor %}
-<script>
-  $(".alert").alert();
-</script>
-{% endif %}
-{% endwith %}
-<a name="newCourse" id="newCourse" class="btn btn-secondary margin" href="{{url_for('dashboard.newCourse')}}" role="button">Add
-  new Course</a>
+<a name="newCourse" id="newCourse" class="btn btn-secondary margin" href="{{url_for('dashboard.newCourse')}}"
+  role="button">Add new Course</a>
 
 <h1>Upload New Video</h1>
 
