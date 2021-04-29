@@ -52,15 +52,18 @@ def login():
                 # both password and email are valid, logging in
                 session['email'] = hhmail
                 session['name'] = name
+                if table == 'Contributor':
+                    session['admin']=True
                 print(f"User with email {hhmail} logged in successfully")
+                flash(f"Welcome back {name}", category='success')
                 return redirect(url_for('home'))
 
             # email is right, password is wrong, flashing message
-            flash('Wrong password')
+            flash('Wrong password', category='danger')
 
     # user not registered
     if not hasResult:
-        flash('You are not registered')
+        flash('You are not registered', category='warning')
 
     return redirect(request.url)
 
@@ -98,7 +101,7 @@ def register():
         return redirect(url_for('login'))
 
     # flashing message if the email is already present
-    flash('This email has already been used.')
+    flash('This email has already been used.', category='warning')
     return redirect(request.url)
 
 
@@ -106,6 +109,7 @@ def register():
 def logout():
     ''' Deletes all the session data'''
     session.clear()
+    flash("You have been successfully logged out", category='success')
     return redirect(url_for('home'))
 
 

@@ -49,12 +49,12 @@ def homepage():
 
     # handles unselected file
     if file.filename == '':
-        flash('No file selected')
+        flash('No file selected', category='warning')
         return redirect(request.url)
 
     # handles _ char
     if '_' in file.filename:
-        flash('Please do not include _ in your file name')
+        flash('Please do not include _ in your file name!', category='info')
         return redirect(request.url)
 
     if file and util.allowedFile(file.filename):
@@ -68,9 +68,9 @@ def homepage():
             file.save(path)
             newFile = True
         else:
-            flash('There is already a file with this name, please rename it')
+            flash('There is already a file with this name, please rename it', category='warning')
     else:
-        flash('The extension of the file is not allowed.')
+        flash('The extension of the file is not allowed.', category='danger')
 
     description = request.form['description']
 
