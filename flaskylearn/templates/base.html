@@ -25,7 +25,7 @@
   <title>{% block title %}{% endblock %}</title>
 </head>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-between">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
   <a class="navbar-brand" href="{{ url_for('home') }}">
     <img class="navbar-logo" width="15px" src="{{ url_for('static', filename='logo.svg') }}" alt="FlaskyLearn">
     FlaskyLearn
@@ -34,23 +34,57 @@
     aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <div class="collapse navbar-collapse" id="navbarNavDropdown">
-    <ul class="navbar-nav">
+  <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+    <ul class="navbar-nav mr-auto">
       <li class="nav-item">
-        <!-- add class active if you want to have bold text! -->
-        <a class="nav-link" id='nav-el1' href="{{ url_for('login') }}">Login</a>
+        <a class="nav-link" href="{{ url_for('courses.homepage') }}">Courses</a>
       </li>
+    </ul>
+  </div>
+  <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+    <ul class="navbar-nav ml-auto">
+      {% if session['email'] %}
       <li class="nav-item">
-        <a class="nav-link" id='nav-el2' href="{{ url_for('register') }}">Register</a>
+        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
       </li>
+      <div class="nav-item">
+        <a href="#" class="nav-link">Hi, <strong>{{ session['name'] }}</strong></a>
+      </div>
+      {% else %}
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+      </li>
+    </ul>
+    {% endif %}
     </ul>
   </div>
 </nav>
 
 <body>
-  {% block content %}
-  {% endblock %}
+  
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show margin" role="alert">
+            <strong>{{ message }}</strong>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+        <script>
+          $(".alert").alert();
+        </script>
+      {% endif %}
+    {% endwith %}
+
+    {% block content %} {% endblock %}
 </body>
 {% block scripts%}
 {% endblock %}
+
 </html>
