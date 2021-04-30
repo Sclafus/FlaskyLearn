@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 {% block title %} {{courseName}} - Lesson {{lessonId}} {% endblock %}
 {% block content %}
-<video controls src="{{url_for(folderPath, filename=videoPath)}}">
-    If you see this message, please update your browser!
-</video>
+    <br>
+    <a class="btn margin btn-primary" href="{{ url_for('courses.homepage')}}">Back</a>
+    <br>
+    <br>
+
+    <video controls class="margin" src="{{url_for(folderPath, filename=videoPath)}}">
+        If you see this message, please update your browser!
+    </video>
+
+    <form action="/" method="post">
+        <button type="submit" class="btn btn-primary">Mark as Played</button>
+    </form>
 {% endblock %}
