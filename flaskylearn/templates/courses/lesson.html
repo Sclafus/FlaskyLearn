@@ -9,8 +9,12 @@
     <video controls class="margin" src="{{url_for(folderPath, filename=videoPath)}}">
         If you see this message, please update your browser!
     </video>
-
-    <form action="#" method="post">
-        <button type="submit" class="btn btn-primary">Mark as Played</button>
-    </form>
+    <br>
+    <br>
+    {% if session['email'] and not session['admin'] %}
+        <form action="#" method="post">
+            <button type="submit" class="btn btn-primary">Mark as Played</button>
+        </form>
+    {% endif %}
+    
 {% endblock %}
