@@ -55,7 +55,6 @@ def login():
                 if table == 'Contributor':
                     session['admin']=True
                 print(f"User with email {hhmail} logged in successfully")
-                flash(f"Welcome back {name}", category='success')
                 return redirect(url_for('home'))
 
             # email is right, password is wrong, flashing message
@@ -109,7 +108,7 @@ def register():
 def logout():
     ''' Deletes all the session data'''
     session.clear()
-    flash("You have been successfully logged out", category='success')
+    flash("You have been successfully logged out", category='warning')
     return redirect(url_for('home'))
 
 
