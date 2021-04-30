@@ -3,13 +3,25 @@
 {% block content %}
 
 <br>
-<div class="list-group margin">
-  {% for lesson in videos %}
-  <a href="{{url_for('courses.specificLesson', courseId=courseId, lessonId=lesson[0])}}"
-    class="list-group-item list-group-item-action bg-dark white-text">Lesson {{lesson[0]}}
-    <p class="mb-1 ">{{lesson[1]}}</p>
-  </a>
-  {% endfor %}
-</div>
+<a class="btn btn-primary margin" href="{{ url_for('courses.homepage')}}">Back</a>
+<br>
+<br>
+{%if videos%}
+  <div class="list-group margin align-items-center">
+    {% for lesson in videos %}
+    <a href="{{url_for('courses.specificLesson', courseId=courseId, lessonId=lesson[0])}}"
+      class="list-group-item list-group-item-action d-flex bg-dark white-text align-items-center">Lesson {{lesson[0]}}
+      <p class="white-text">{{lesson[1]}}</p>
+      {% if lesson[2] %}
+        <span class="badge badge-primary badge-pill">✔️</span>
+      {% endif %}
+      
+    </a>
+    {% endfor %}
+  </div>
+{% else %}
+<p>Sorry there are no lessons yet! Stay tuned!</p>
+
+{% endif %}
 
 {% endblock %}
