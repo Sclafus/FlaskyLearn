@@ -5,8 +5,6 @@ courses = Blueprint("courses", __name__,
 
 
 @courses.route('/')
-@courses.route('/home')
-@courses.route('/homepage')
 def homepage():
     '''courses homepage, card style'''
     dbCurr = db.cursor()
@@ -25,13 +23,19 @@ def specificCourse(courseId: int):
     dbCurr = db.cursor()
     videos = []
 
+    # getting course name
+    dbCurr.execute("SELECT name FROM Course WHERE id=?", (courseId, ))
+    for _courseName in dbCurr:
+        courseName = _courseName[0]
+
+    # Getting all the lessons for the specified course
     dbCurr.execute(
         "SELECT DISTINCT lesson, description FROM Composition INNER JOIN Video ON Video.id = Composition.videoid WHERE Composition.courseid = ?", (courseId,))
 
     for elem in dbCurr:
         videos.append(elem)
 
-    return render_template('courses/course.html', videos=videos, courseId=courseId)
+    return render_template('courses/course.html', courseName=courseName, videos=videos, courseId=courseId)
 
 
 @courses.route('/<int:courseId>/lesson<int:lessonId>', methods=['POST', 'GET'])
@@ -49,11 +53,10 @@ def specificLesson(courseId: int, lessonId: int):
     dbCurr.execute(
         "SELECT path FROM Composition INNER JOIN Video on Composition.videoid = Video.id WHERE videoid = ? AND courseid=?", (lessonId, courseId))
 
-    #TODO bad paths
     for _path in dbCurr:
         path = _path[0].split('/')
-        videoPath = '/'.join(path[2:])
-        folderPath = path[1]
+        videoPath = '/'.join(path[-2:])
+        folderPath = path[-3]
 
     return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath)
 
@@ -61,6 +64,5 @@ def specificLesson(courseId: int, lessonId: int):
 @courses.route('/<int:courseId>/quiz', methods=['POST', 'GET'])
 def specificQuiz(courseId: int):
     '''Quiz for the specified course'''
-    pass
     # dbCurr = db.cursor()
     # dbCurr.execute("SELECT * FROM Test INNER JOIN Question ON Test.question = Question.id INNER JOIN MadeUp ON ")
