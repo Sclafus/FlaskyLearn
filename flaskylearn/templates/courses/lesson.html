@@ -2,7 +2,7 @@
 {% block title %} {{courseName}} - Lesson {{lessonId}} {% endblock %}
 {% block content %}
     <br>
-    <a class="btn margin btn-primary" href="{{ url_for('courses.homepage')}}">Back</a>
+    <a class="btn margin btn-primary" href="{{ url_for('courses.specificCourse', courseId=courseId)}}">Back</a>
     <br>
     <br>
 
