@@ -20,8 +20,15 @@ def homepage():
 @courses.route('/<int:courseId>/', methods=['POST', 'GET'])
 def specificCourse(courseId: int):
     '''Page for a specified course, dinamically generated'''
-
     dbCurr = db.cursor()
+
+    # POST request = a user is trying to enroll in the course
+    if request.method == 'POST':
+        dbCurr.execute("INSERT INTO Enrollment VALUES (?, ?, ?)", (session['email'], courseId, util.getTimestamp()))
+        flash("You have been enrolled successfully", category='success')
+        return redirect(request.url)
+
+    # GET request
     lessons = []
     videos = []
     # getting course name
@@ -63,7 +70,7 @@ def specificCourse(courseId: int):
     except KeyError:
         # user not logged in, enrollment is not applicable
         session['enrolled'] = None
-        
+
     return render_template('courses/course.html', courseName=courseName, videos=videos, courseId=courseId)
 
 
