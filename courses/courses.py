@@ -70,8 +70,13 @@ def specificCourse(courseId: int):
     except KeyError:
         # user not logged in, enrollment is not applicable
         session['enrolled'] = None
-
-    return render_template('courses/course.html', courseName=courseName, videos=videos, courseId=courseId)
+    
+    # checks if the user has seen all the lessons or not
+    notViewedVideos = [video for video in videos if not video[2]] 
+    quizAvailable = True if not notViewedVideos else False
+    if quizAvailable: 
+        flash("Congratulations, you have finished the course! You can take a brief quiz to obtain your certificate", category='success')
+    return render_template('courses/course.html', courseName=courseName, videos=videos, courseId=courseId, quizAvailable=quizAvailable)
 
 
 @courses.route('/<int:courseId>/lesson<int:lessonId>', methods=['GET', 'POST'])
@@ -120,11 +125,12 @@ def specificLesson(courseId: int, lessonId: int):
         videoPath = '/'.join(path[-2:])
         folderPath = path[-3]
 
-    return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath)
+    return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath, courseId=courseId)
 
 
 @courses.route('/<int:courseId>/quiz', methods=['POST', 'GET'])
 def specificQuiz(courseId: int):
     '''Quiz for the specified course'''
+    return render_template("courses/quiz.html")
     # dbCurr = db.cursor()
     # dbCurr.execute("SELECT * FROM Test INNER JOIN Question ON Test.question = Question.id INNER JOIN MadeUp ON ")
