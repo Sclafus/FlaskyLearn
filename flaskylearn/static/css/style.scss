@@ -1,5 +1,5 @@
 $background: hsl(0, 0%, 17%);
-$text-muted: hsl(0, 0%, 55%);
+$text-muted: hsl(0, 0%, 45%);
 $text-color: hsl(0, 0%, 83%);
 $accent-color: hsl(312, 100%, 75%);
 $accent-color-hover: hsl(312, 100%, 68%);
@@ -53,16 +53,29 @@ p {
   color: $text-color;
 }
 
-.text-muted .card-subtitle {
-  color: $text-muted;
+.card {
+  word-wrap: normal !important;
 }
 
-// .btn-primary {
-//   background-color: $accent-color;
-//   border-color: $accent-color;
+.card-link {
+  margin-left: 90% !important;
+}
 
-//   &:hover {  
-//     background-color: $accent-color-hover;
-//     border-color: $accent-color-hover;
-//   }
-// }
+.text-muted {
+  color: $text-muted !important;
+}
+
+.btn-primary {
+  background-color: $accent-color;
+  border-color: $accent-color;
+
+  &:hover {  
+    background-color: $accent-color-hover;
+    border-color: $accent-color-hover;
+  }
+  // fix
+  // &:click {  
+  //   background-color: $accent-color-hover;
+  //   border-color: $accent-color-hover;
+  // }
+}

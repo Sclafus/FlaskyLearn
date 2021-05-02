@@ -48,7 +48,25 @@ p {
   color: #d4d4d4;
 }
 
-.text-muted .card-subtitle {
-  color: #8c8c8c;
+.card {
+  word-wrap: normal !important;
+}
+
+.card-link {
+  margin-left: 90% !important;
+}
+
+.text-muted {
+  color: #737373 !important;
+}
+
+.btn-primary {
+  background-color: #ff80e6;
+  border-color: #ff80e6;
+}
+
+.btn-primary:hover {
+  background-color: #ff5cde;
+  border-color: #ff5cde;
 }
 /*# sourceMappingURL=style.css.map */
