@@ -1,6 +1,8 @@
 $background: hsl(0, 0%, 17%);
 $text-muted: hsl(0, 0%, 55%);
 $text-color: hsl(0, 0%, 83%);
+$accent-color: hsl(312, 100%, 75%);
+$accent-color-hover: hsl(312, 100%, 68%);
 
 .navbar-logo {
   size: 15px;
@@ -54,3 +56,13 @@ p {
 .text-muted .card-subtitle {
   color: $text-muted;
 }
+
+// .btn-primary {
+//   background-color: $accent-color;
+//   border-color: $accent-color;
+
+//   &:hover {  
+//     background-color: $accent-color-hover;
+//     border-color: $accent-color-hover;
+//   }
+// }
