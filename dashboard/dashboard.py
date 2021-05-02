@@ -92,11 +92,8 @@ def homepage():
             courseID = _courseIDTuple[0]
 
         # insert new video in release table
-
-        ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
         dbCurr.execute(f"INSERT INTO {util.getEnv()['dbSchema']}.Release VALUES (?, ?, ?)",
-                    (session['email'], videoID, ts))
+                    (session['email'], videoID, util.getTimestamp()))
 
         # insert new video in the course
         dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",

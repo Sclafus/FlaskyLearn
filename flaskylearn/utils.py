@@ -1,5 +1,6 @@
 import mariadb
 from Crypto.Hash import SHA3_256
+from datetime import datetime
 
 
 class Utils:
@@ -37,6 +38,9 @@ class Utils:
             print(f"Error connecting to MariaDB Platform: {e}")
             raise Exception
         return None
+
+    def getTimestamp(self):
+        return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     def getEnv(self) -> dict:
         '''Returns the env'''
