@@ -74,7 +74,7 @@ def specificCourse(courseId: int):
     # checks if the user has seen all the lessons or not
     notViewedVideos = [video for video in videos if not video[2]] 
     quizAvailable = True if not notViewedVideos else False
-    if quizAvailable: 
+    if quizAvailable and videos: 
         flash("Congratulations, you have finished the course! You can take a brief quiz to obtain your certificate", category='success')
     return render_template('courses/course.html', courseName=courseName, videos=videos, courseId=courseId, quizAvailable=quizAvailable)
 
