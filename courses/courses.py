@@ -17,7 +17,7 @@ def homepage():
     return render_template('courses/courses.html', context=courses)
 
 
-@courses.route('/<int:courseId>/')
+@courses.route('/<int:courseId>/', methods=['POST', 'GET'])
 def specificCourse(courseId: int):
     '''Page for a specified course, dinamically generated'''
 
@@ -36,6 +36,7 @@ def specificCourse(courseId: int):
     for lesson, description in dbCurr:
         lessons.append((lesson, description))
 
+    # checking if the lesson has already been viewed
     for lesson, description in lessons:
         flag = False
 
@@ -45,8 +46,24 @@ def specificCourse(courseId: int):
             for _ in dbCurr:
                 flag = True
         except KeyError:
+            # user not logged in
             pass
+
         videos.append((lesson, description, flag))
+
+    # checking if the user is already enrolled
+    try:
+        session['enrolled'] = False
+        dbCurr.execute(
+            "SELECT timestamp FROM Enrollment WHERE email=? AND id=?", (session['email'], courseId))
+
+        for _ in dbCurr:
+            session['enrolled'] = True
+        
+    except KeyError:
+        # user not logged in, enrollment is not applicable
+        session['enrolled'] = None
+        
     return render_template('courses/course.html', courseName=courseName, videos=videos, courseId=courseId)
 
 

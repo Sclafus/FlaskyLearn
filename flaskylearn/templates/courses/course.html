@@ -4,6 +4,13 @@
 
 <br>
 <a class="btn btn-primary margin" href="{{ url_for('courses.homepage')}}">Back</a>
+
+{% if ((session['enrolled'] == False) and (not session['admin']) )%}
+  <form action="#" method="post">
+    <button type="submit" class="btn btn-primary">Enroll to this course</button>
+  </form>
+{% endif %}
+
 <br>
 <br>
 {%if videos%}
@@ -15,7 +22,6 @@
       {% if lesson[2] %}
         <span class="badge badge-primary badge-pill">✔️</span>
       {% endif %}
-      
     </a>
     {% endfor %}
   </div>
