@@ -79,3 +79,15 @@ p {
   //   border-color: $accent-color-hover;
   // }
 }
+
+.quiz {
+  button {
+    width: min-content;
+    height: min-content;
+    padding: 1px 1px 1px 1px;
+    margin-left: (1em / 2);
+  }
+  .form-control {
+    width: 80%;
+  }
+}

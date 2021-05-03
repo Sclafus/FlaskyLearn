@@ -69,4 +69,19 @@ p {
   background-color: #ff5cde;
   border-color: #ff5cde;
 }
+
+.quiz button {
+  width: -webkit-min-content;
+  width: -moz-min-content;
+  width: min-content;
+  height: -webkit-min-content;
+  height: -moz-min-content;
+  height: min-content;
+  padding: 1px 1px 1px 1px;
+  margin-left: 0.5em;
+}
+
+.quiz .form-control {
+  width: 80%;
+}
 /*# sourceMappingURL=style.css.map */
