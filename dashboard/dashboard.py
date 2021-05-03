@@ -129,11 +129,18 @@ def newCourse():
 
 @dashboard.route('/newQuiz', methods=['POST', 'GET'])
 def newQuiz():
-    '''returns the page where you can assemble the questions for a definied course'''
-    return render_template('dashboard/newQuiz.html')
+    '''returns the page where you can create a quiz for your course'''
+    dbCurr = db.cursor()
 
-
-@dashboard.route('/newQuestion', methods=['POST', 'GET'])
-def newQuestion():
-    '''returns the page where you can add new questions and answers'''
-    return render_template('dashboard/newQuestion.html')
+    #GET Request
+    if request.method != 'POST':
+        #getting courses
+        courses = {}
+        # selecting only the courses that don't have a Test
+        dbCurr.execute("SELECT id, name FROM Course WHERE id NOT IN (SELECT courseid FROM Test)")
+        for courseId, courseName in dbCurr:
+            courses[courseId] = courseName
+        return render_template('dashboard/newQuiz.html', courses=courses)
+    
+    # TODO POST Request 
+    quiz = {}

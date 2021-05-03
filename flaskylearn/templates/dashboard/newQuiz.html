@@ -2,4 +2,24 @@
 {% block title %}New quiz{% endblock %}
 {% block content %}
 
+<form method="post">
+  <div class="form-group">
+    <label for="course">Select the course</label>
+    <select class="form-control" name="course" id="course" required>
+      {% for key, value in courses.items() %}
+      <option value="{{key}}">{{value}}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="quiz" id="quiz">
+
+  </div>
+  <button type="button" class="btn btn-primary" onclick="addQuestion()">Add Question</button>
+  <br><br>
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+{% endblock %}
+{% block scripts %}
+  <script src="{{url_for('static', filename='js/newQuiz.js')}}"></script>
 {% endblock %}
