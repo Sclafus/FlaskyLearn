@@ -144,3 +144,4 @@ def newQuiz():
     
     # TODO POST Request 
     quiz = {}
+    return redirect(request.url)

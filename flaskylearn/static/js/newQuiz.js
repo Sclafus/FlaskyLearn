@@ -13,6 +13,7 @@ function addQuestion() {
     let question = document.createElement('input');
     question.type = 'text';
     question.placeholder = 'Insert question';
+    question.id = ++inputIndex;
     // question.classList.add('form-control');
     question.required = true;
 
