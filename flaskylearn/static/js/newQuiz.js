@@ -94,41 +94,29 @@ function deleteAnswer() {
 /**
  * submits the for in a json object
  */
-function submitForm(){
+function submitForm() {
 
-    quiz = {"questions" : []};
-    
+
     // getting the data from the form
     const questions = document.getElementsByClassName('question');
+    const course = document.getElementById('course').value;
 
     // constructing the json object
-    for (const question of questions){
-        let tmpQuestion = {question: question.children[0].value, answers: []};
+    quiz = { "course": course, "questions": [] };
+    for (const question of questions) {
+        let tmpQuestion = { question: question.children[0].value, answers: [] };
 
-        for (const answer of question.children){
-            if (answer.classList.contains('answer')){
-                let tmpAnswer = {"answer": answer.firstChild.value, "correct" : answer.children[2].checked };
+        for (const answer of question.children) {
+            if (answer.classList.contains('answer')) {
+                let tmpAnswer = { "answer": answer.firstChild.value, "correct": answer.children[2].checked };
                 tmpQuestion.answers.push(tmpAnswer);
             }
         }
 
         quiz.questions.push(tmpQuestion);
     }
-    console.log(quiz);
 
-    // sending the data with a POST request
-    // let xhr = new XMLHttpRequest;
-    // xhr.onreadystatechange = function() {
-    //     if(this.readyState == 4 && this.status == 200){
-    //         console.log("good!");
-    //     } else {
-    //         console.log("ok!");
-    //     }
-    // }
-
-    // xhr.open('POST', '/', true);
-    // xhr.setRequestHeader("content-type", "application/json");
-    // xhr.send(quiz);
+    // sending the data to the server
     fetch(`${window.location}`, {
         method: "POST",
         body: JSON.stringify(quiz),
