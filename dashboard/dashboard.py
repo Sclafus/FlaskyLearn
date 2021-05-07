@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, abort, redirect, flash, url_for
+from flask import Blueprint, render_template, request, session, abort, redirect, flash, url_for, jsonify
 from werkzeug.utils import secure_filename
 from flaskylearn import db, util, app
 
@@ -142,6 +142,11 @@ def newQuiz():
             courses[courseId] = courseName
         return render_template('dashboard/newQuiz.html', courses=courses)
     
-    # TODO POST Request 
-    quiz = {}
+    # POST Request 
+    quiz = request.get_json()
+    print(quiz)
+    # for element in request.get_json(): 
+    #     print(element)
+    
+    
     return redirect(request.url)
