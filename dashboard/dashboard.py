@@ -68,7 +68,8 @@ def homepage():
             file.save(path)
             newFile = True
         else:
-            flash('There is already a file with this name, please rename it', category='warning')
+            flash('There is already a file with this name, please rename it',
+                  category='warning')
     else:
         flash('The extension of the file is not allowed.', category='danger')
 
@@ -87,17 +88,17 @@ def homepage():
 
         # getting course ID
         dbCurr.execute("SELECT id FROM Course WHERE name=?",
-                    (request.form['course'],))
+                       (request.form['course'],))
         for _courseIDTuple in dbCurr:
             courseID = _courseIDTuple[0]
 
         # insert new video in release table
         dbCurr.execute(f"INSERT INTO {util.getEnv()['dbSchema']}.Release VALUES (?, ?, ?)",
-                    (session['email'], videoID, util.getTimestamp()))
+                       (session['email'], videoID, util.getTimestamp()))
 
         # insert new video in the course
         dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",
-                    (videoID, courseID, int(request.form['lessonNum'])))
+                       (videoID, courseID, int(request.form['lessonNum'])))
 
     return redirect(request.url)
 
@@ -132,21 +133,46 @@ def newQuiz():
     '''returns the page where you can create a quiz for your course'''
     dbCurr = db.cursor()
 
-    #GET Request
-    if request.method != 'POST':
-        #getting courses
+    # GET Request
+    if request.method == 'GET':
+        # getting courses
         courses = {}
         # selecting only the courses that don't have a Test
-        dbCurr.execute("SELECT id, name FROM Course WHERE id NOT IN (SELECT courseid FROM Test)")
+        dbCurr.execute(
+            "SELECT id, name FROM Course WHERE id NOT IN (SELECT courseid FROM Test)")
         for courseId, courseName in dbCurr:
             courses[courseId] = courseName
         return render_template('dashboard/newQuiz.html', courses=courses)
-    
-    # POST Request 
-    quiz = request.get_json()
-    print(quiz)
-    # for element in request.get_json(): 
-    #     print(element)
-    
-    
-    return redirect(request.url)
+
+    # POST Request
+    if request.method == 'POST':
+        # Getting data
+        quiz = request.get_json()
+
+        # Adding questions and answers
+        for question in quiz['questions']:
+
+            # adding the question
+            dbCurr.execute("INSERT INTO Question (topic) VALUES (?)",
+                           (question['question'], ))
+
+            # getting the question id back
+            questionId = dbCurr.lastrowid
+
+            # adding the question to the Test table
+            dbCurr.execute("INSERT INTO Test VALUES (?, ?, ?)",
+                           (quiz['course'], questionId, 1.0))
+
+            # adding the answers for the question
+            for answer in question['answers']:
+                # adding the answer in the Answer table
+                dbCurr.execute(
+                    "INSERT INTO Answer (topic) VALUES (?)", (answer['answer'], ))
+                answerId = dbCurr.lastrowid
+
+                # adding the answer and question in the MadeUp table
+                dbCurr.execute("INSERT INTO MadeUp VALUES (?, ?, ?)",
+                               (questionId, answerId, answer['correct']))
+
+        flash('The quiz has been submitted correctly!', category='success')
+        return redirect(request.url)
