@@ -77,7 +77,7 @@ p {
   height: -webkit-min-content;
   height: -moz-min-content;
   height: min-content;
-  padding: 1px 1px 1px 1px;
+  padding: 1px;
   margin-left: 0.5em;
 }
 
