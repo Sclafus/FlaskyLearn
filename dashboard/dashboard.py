@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, abort, redirect, flash, url_for, jsonify
+from flask import Blueprint, render_template, request, session, abort, redirect, flash, url_for, jsonify, make_response
 from werkzeug.utils import secure_filename
 from flaskylearn import db, util, app
 
@@ -160,8 +160,8 @@ def newQuiz():
             questionId = dbCurr.lastrowid
 
             # adding the question to the Test table
-            dbCurr.execute("INSERT INTO Test VALUES (?, ?, ?)",
-                           (quiz['course'], questionId, 1.0))
+            dbCurr.execute("INSERT INTO Test (courseid, questionid) VALUES (?, ?)",
+                           (quiz['course'], questionId))
 
             # adding the answers for the question
             for answer in question['answers']:
@@ -174,5 +174,7 @@ def newQuiz():
                 dbCurr.execute("INSERT INTO MadeUp VALUES (?, ?, ?)",
                                (questionId, answerId, answer['correct']))
 
-        flash('The quiz has been submitted correctly!', category='success')
-        return redirect(request.url)
+        # Getting the response back
+        response = make_response(jsonify({'message' : 'The quiz has been submitted correctly!'}), 200)
+        flash("The quiz has been submitted correctly!", category='success')
+        return response

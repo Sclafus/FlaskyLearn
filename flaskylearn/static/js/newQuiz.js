@@ -95,7 +95,7 @@ function deleteAnswer() {
  * submits the for in a json object
  */
 function submitForm() {
-
+    // TODO form validation  
 
     // getting the data from the form
     const questions = document.getElementsByClassName('question');
@@ -123,6 +123,17 @@ function submitForm() {
         cache: "no-cache",
         headers: new Headers({
             "content-type": "application/json"
+        }) 
+    }) //getting the response back
+        .then(function (response) {
+            if (response.status !== 200) {
+                console.log(`Response status was ${response.status}`)
+                return ;
+            }
+
+            response.json().then( function (data){
+                console.log(data);
+                location.reload();
+            })
         })
-    })
 }
