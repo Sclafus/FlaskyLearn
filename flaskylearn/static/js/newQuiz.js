@@ -168,12 +168,13 @@ function submitForm() {
     quiz = { "course": course, "questions": [] };
     for (const question of questions) {
         let tmpQuestion = { question: question.children[0].value, answers: [] };
+        
+        // filtering
+        const answers = Array.from(question.children).filter(ans => ans.classList.contains('answer'));
 
-        for (const answer of question.children) {
-            if (answer.classList.contains('answer')) {
-                let tmpAnswer = { "answer": answer.firstChild.value, "correct": answer.children[2].checked };
-                tmpQuestion.answers.push(tmpAnswer);
-            }
+        for (const answer of answers) {
+            let tmpAnswer = { "answer": answer.firstChild.value, "correct": answer.children[2].checked };
+            tmpQuestion.answers.push(tmpAnswer);
         }
 
         quiz.questions.push(tmpQuestion);
