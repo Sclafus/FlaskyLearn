@@ -2,23 +2,28 @@
 {% block title %}New quiz{% endblock %}
 {% block content %}
 
-<form method="post">
-  <div class="form-group">
-    <label for="course">Select the course</label>
-    <select class="form-control" name="course" id="course" required>
-      {% for key, value in courses.items() %}
-      <option value="{{key}}">{{value}}</option>
-      {% endfor %}
-    </select>
+{% if courses %}
+  <form method="post">
+    <div class="form-group">
+      <label for="course">Select the course</label>
+      <select class="form-control" name="course" id="course" required>
+        {% for key, value in courses.items() %}
+        <option value="{{key}}">{{value}}</option>
+        {% endfor %}
+      </select>
 
-    <div class="quiz" id="quiz">
-  </div>
+      <div class="quiz" id="quiz">
+    </div>
 
-  </div>
-  <button type="button" class="btn btn-primary" onclick="addQuestion()">Add Question</button>
-  <br><br>
-  <button id="submit" type="button" class="btn btn-primary" onclick="submitForm()">Submit</button>
-</form>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="addQuestion()">Add Question</button>
+    <br><br>
+    <button id="submit" type="button" class="btn btn-primary" onclick="submitForm()">Submit</button>
+  </form>
+{% else %}
+  <h1 class="white-text"> All the courses have a quiz!</h1>
+{% endif %}
+
 
 {% endblock %}
 {% block scripts %}
