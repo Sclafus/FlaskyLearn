@@ -24,7 +24,8 @@ def specificCourse(courseId: int):
 
     # POST request = a user is trying to enroll in the course
     if request.method == 'POST':
-        dbCurr.execute("INSERT INTO Enrollment VALUES (?, ?, ?)", (session['email'], courseId, util.getTimestamp()))
+        dbCurr.execute("INSERT INTO Enrollment VALUES (?, ?, ?)",
+                       (session['email'], courseId, util.getTimestamp()))
         flash("You have been enrolled successfully", category='success')
         return redirect(request.url)
 
@@ -66,15 +67,15 @@ def specificCourse(courseId: int):
 
         for _ in dbCurr:
             session['enrolled'] = True
-        
+
     except KeyError:
         # user not logged in, enrollment is not applicable
         session['enrolled'] = None
-    
+
     # checks if the user has seen all the lessons or not
-    notViewedVideos = [video for video in videos if not video[2]] 
+    notViewedVideos = [video for video in videos if not video[2]]
     quizAvailable = True if not notViewedVideos else False
-    if quizAvailable and videos: 
+    if quizAvailable and videos:
         flash("Congratulations, you have finished the course! You can take a brief quiz to obtain your certificate", category='success')
     return render_template('courses/course.html', courseName=courseName, videos=videos, courseId=courseId, quizAvailable=quizAvailable)
 
@@ -131,6 +132,35 @@ def specificLesson(courseId: int, lessonId: int):
 @courses.route('/<int:courseId>/quiz', methods=['POST', 'GET'])
 def specificQuiz(courseId: int):
     '''Quiz for the specified course'''
-    return render_template("courses/quiz.html")
-    # dbCurr = db.cursor()
-    # dbCurr.execute("SELECT * FROM Test INNER JOIN Question ON Test.question = Question.id INNER JOIN MadeUp ON ")
+    quiz = []
+    dbCurr = db.cursor()
+
+    # getting questions id for the test
+    questionIds = []
+    dbCurr.execute("SELECT questionid FROM Test WHERE courseid=?", (courseId,))
+    for _questionId in dbCurr:
+        questionIds.append(_questionId)
+
+    # getting question text
+    for _questionId in questionIds:
+        dbCurr.execute("SELECT text FROM Question WHERE id=?", _questionId)
+        for _questionText in dbCurr:
+            questionText = _questionText[0]
+        question = {"question": questionText, "answers": {}}
+        quiz.append(question)
+
+    for question in quiz:
+        dbCurr.execute(
+            "SELECT answerid, correct FROM MadeUp WHERE questionid=?", (question['question'], ))
+
+        answers = []
+        for _answer in dbCurr:
+            answers.append(_answer)
+
+        for answerId, answerCorrect in answers:
+            dbCurr.execute("SELECT text FROM Answer WHERE id=?", (answerId,))
+            for _answerText in dbCurr:
+                question['answers']['text'] = _answerText[0]
+                question['answers']['correct'] = answerCorrect
+        
+    return render_template("courses/quiz.html", quiz=quiz)
