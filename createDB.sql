@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS `Visualization` (
 
 CREATE TABLE IF NOT EXISTS `Test` (
   `courseid` int,
-  `question` int,
+  `questionid` int,
   `weight` float DEFAULT 1,
-  PRIMARY KEY(`courseid`, `question`)
+  PRIMARY KEY(`courseid`, `questionid`)
 );
 
 CREATE TABLE IF NOT EXISTS `Question` (
