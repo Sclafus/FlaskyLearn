@@ -11,7 +11,7 @@
   </form>
 {% endif %}
 
-{% if quizAvailable %}
+{% if quizAvailable and videos%}
   <a class="btn btn-primary margin" href="{{ url_for('courses.specificQuiz', courseId=courseId)}}">Quiz</a>
 {% endif %}
 
