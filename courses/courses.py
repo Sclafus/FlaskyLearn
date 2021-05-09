@@ -89,14 +89,15 @@ def specificLesson(courseId: int, lessonId: int):
     if not 'email' in session:
         flash("You need to login in order to see this lesson", category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
-        
+
     try:
         if not session['enrolled']:
-            flash("You need to enroll in the course to see the lessons", category='warning')
+            flash("You need to enroll in the course to see the lessons",
+                  category='warning')
             return redirect(url_for('courses.specificCourse', courseId=courseId))
     except KeyError:
-            return redirect(url_for('courses.specificCourse', courseId=courseId))
-        
+        return redirect(url_for('courses.specificCourse', courseId=courseId))
+
     # POST Request
     if request.method == 'POST':
 
@@ -142,6 +143,7 @@ def specificQuiz(courseId: int):
     dbCurr = db.cursor()
 
     # getting questions id for the test
+    # TODO optimization, use join instead of two differnt loops 
     questionIds = []
     dbCurr.execute("SELECT questionid FROM Test WHERE courseid=?", (courseId,))
     for _questionId in dbCurr:
@@ -149,25 +151,21 @@ def specificQuiz(courseId: int):
 
     # getting question text
     for _questionId in questionIds:
-        dbCurr.execute("SELECT text FROM Question WHERE id=?", _questionId)
+        dbCurr.execute("SELECT topic FROM Question WHERE id=?", _questionId)
         for _questionText in dbCurr:
             questionText = _questionText[0]
-        question = {"question": questionText, "answers": {}}
+        question = {"questionText": questionText,
+                    "questionId": _questionId[0], "answers": []}
         quiz.append(question)
 
-    for question in quiz:
+    for _question in quiz:
+        print(f"question id: {_question['questionId']}")
         dbCurr.execute(
-            "SELECT answerid, correct FROM MadeUp WHERE questionid=?", (question['question'], ))
-
-        answers = []
-        for _answer in dbCurr:
-            answers.append(_answer)
-
-        for answerId, answerCorrect in answers:
-            dbCurr.execute("SELECT text FROM Answer WHERE id=?", (answerId,))
-            for _answerText in dbCurr:
-                question['answers']['text'] = _answerText[0]
-                question['answers']['correct'] = answerCorrect
+            "SELECT topic, correct FROM Answer INNER JOIN MadeUp ON Answer.id = MadeUp.answerid WHERE questionid=?", (_question['questionId'], ))
+        for topic, correct in dbCurr:
+            print(f"answer for {_questionId[0]}: {topic}")
+            _question['answers'].append(
+                {"answerText": topic, "answerCorrect": correct})
 
     print(quiz)
     return render_template("courses/quiz.html", quiz=quiz)
