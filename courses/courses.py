@@ -133,7 +133,7 @@ def specificLesson(courseId: int, lessonId: int):
         path = _path[0].split('/')
         videoPath = '/'.join(path[-2:])
         folderPath = path[-3]
-
+    #FIXME something is wrong here!
     return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath, courseId=courseId)
 
 @lru_cache
@@ -175,7 +175,8 @@ def specificQuiz(courseId: int):
 
     # POST Request
     if request.method == 'POST':
-        pass
+        print(request.form)
+        return (request.form)
 
     # GET Request
     if request.method == 'GET':
