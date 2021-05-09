@@ -60,8 +60,8 @@ def specificCourse(courseId: int):
         videos.append((lesson, description, flag))
 
     # checking if the user is already enrolled
+    session['enrolled'] = False
     try:
-        session['enrolled'] = False
         dbCurr.execute(
             "SELECT timestamp FROM Enrollment WHERE email=? AND id=?", (session['email'], courseId))
 
@@ -70,7 +70,7 @@ def specificCourse(courseId: int):
 
     except KeyError:
         # user not logged in, enrollment is not applicable
-        session['enrolled'] = None
+        pass
 
     # checks if the user has seen all the lessons or not
     notViewedVideos = [video for video in videos if not video[2]]
@@ -83,14 +83,20 @@ def specificCourse(courseId: int):
 @courses.route('/<int:courseId>/lesson<int:lessonId>', methods=['GET', 'POST'])
 def specificLesson(courseId: int, lessonId: int):
     '''Page for a specified lesson, displays video'''
+    dbCurr = db.cursor()
 
     # user is not logged in
     if not 'email' in session:
         flash("You need to login in order to see this lesson", category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
-
-    dbCurr = db.cursor()
-
+        
+    try:
+        if not session['enrolled']:
+            flash("You need to enroll in the course to see the lessons", category='warning')
+            return redirect(url_for('courses.specificCourse', courseId=courseId))
+    except KeyError:
+            return redirect(url_for('courses.specificCourse', courseId=courseId))
+        
     # POST Request
     if request.method == 'POST':
 
@@ -162,5 +168,6 @@ def specificQuiz(courseId: int):
             for _answerText in dbCurr:
                 question['answers']['text'] = _answerText[0]
                 question['answers']['correct'] = answerCorrect
-        
+
+    print(quiz)
     return render_template("courses/quiz.html", quiz=quiz)
