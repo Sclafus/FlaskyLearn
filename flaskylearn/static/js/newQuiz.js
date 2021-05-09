@@ -137,6 +137,7 @@ function isFormValid() {
             return formValidationError("At least one answer needs to be correct");
         }
     }
+    return true;
 }
 
 /**
@@ -157,6 +158,7 @@ function submitForm() {
 
     // form validation
     if (!isFormValid()) {
+        console.log(isFormValid());
         return;
     }
 
