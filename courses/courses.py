@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, session, flash, redirect, url_for
 from flaskylearn import db, util
 from datetime import datetime
+from functools import lru_cache
 courses = Blueprint("courses", __name__,
                     static_folder='static', template_folder='templates')
 
@@ -135,15 +136,22 @@ def specificLesson(courseId: int, lessonId: int):
 
     return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath, courseId=courseId)
 
-
+@lru_cache
 @courses.route('/<int:courseId>/quiz', methods=['POST', 'GET'])
 def specificQuiz(courseId: int):
     '''Quiz for the specified course'''
+    # TODO add user check
+    # Getting the quiz
     quiz = []
     dbCurr = db.cursor()
 
+    # Getting course name
+    dbCurr.execute("SELECT name FROM Course WHERE id=?", (courseId, ))
+    for _courseName in dbCurr:
+        courseName = _courseName[0]
+
     # getting questions id for the test
-    # TODO optimization, use join instead of two differnt loops 
+    # TODO optimization, use join instead of two different loops 
     questionIds = []
     dbCurr.execute("SELECT questionid FROM Test WHERE courseid=?", (courseId,))
     for _questionId in dbCurr:
@@ -159,13 +167,16 @@ def specificQuiz(courseId: int):
         quiz.append(question)
 
     for _question in quiz:
-        print(f"question id: {_question['questionId']}")
         dbCurr.execute(
             "SELECT topic, correct FROM Answer INNER JOIN MadeUp ON Answer.id = MadeUp.answerid WHERE questionid=?", (_question['questionId'], ))
         for topic, correct in dbCurr:
-            print(f"answer for {_questionId[0]}: {topic}")
             _question['answers'].append(
-                {"answerText": topic, "answerCorrect": correct})
+                {"answerText": topic, "answerCorrect": True if correct else False})
 
-    print(quiz)
-    return render_template("courses/quiz.html", quiz=quiz)
+    # POST Request
+    if request.method == 'POST':
+        pass
+
+    # GET Request
+    if request.method == 'GET':
+        return render_template("courses/quiz.html", courseName=courseName, quiz=quiz)

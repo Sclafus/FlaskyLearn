@@ -1,2 +1,21 @@
 {% extends "base.html" %}
+{% block title %} {{courseName}} - Quiz {% endblock %}
+{% block content %}
+<form method="post">
+  {% for question in quiz %}
+  <div class="question-quiz">
+    <label class="margin">{{ question['questionText'] }}</label>
+      <div class="answers-quiz margin">
+        {% for answer in question['answers'] %}
+        <div class="form-group form-check">
+          <input type="checkbox" class="form-check-input">
+          <label class="form-check-label">{{ answer['answerText'] }}</label>
+        </div>
+        {% endfor %}
+      </div>
 
+  </div>
+  {% endfor %}
+  <button type="submit" class="btn btn-primary">Submit!</button>
+</form>
+{% endblock %}

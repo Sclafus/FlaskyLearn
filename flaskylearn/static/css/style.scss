@@ -1,4 +1,5 @@
 $background: hsl(0, 0%, 17%);
+$darker-background: hsl(0, 0%, 10%);
 $text-muted: hsl(0, 0%, 45%);
 $text-color: hsl(0, 0%, 83%);
 $accent-color: hsl(312, 100%, 75%);
@@ -89,5 +90,22 @@ p {
   }
   .form-control {
     width: 80%;
+  }
+}
+
+.question-quiz {
+  border-radius: (3vw / 2);
+  padding-bottom: 1px;
+  margin-top: 20px;
+  background-color: $darker-background;
+  label {
+    &:not(.form-check-label) {
+      margin-left: 1.1vw;
+      font-size: 24px;
+    }
+  }
+  
+  .answers-quiz {
+      margin-left: 1.5vw;
   }
 }

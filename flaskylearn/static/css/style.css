@@ -84,4 +84,20 @@ p {
 .quiz .form-control {
   width: 80%;
 }
+
+.question-quiz {
+  border-radius: 1.5vw;
+  padding-bottom: 1px;
+  margin-top: 20px;
+  background-color: #1a1a1a;
+}
+
+.question-quiz label:not(.form-check-label) {
+  margin-left: 1.1vw;
+  font-size: 24px;
+}
+
+.question-quiz .answers-quiz {
+  margin-left: 1.5vw;
+}
 /*# sourceMappingURL=style.css.map */
