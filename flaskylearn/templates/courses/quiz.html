@@ -1,20 +1,24 @@
 {% extends "base.html" %}
 {% block title %} {{courseName}} - Quiz {% endblock %}
 {% block content %}
-<form method="post">
+{% set answer_counter = namespace(value=1) %}
+<form action="#" method="POST">
   {% for question in quiz %}
+  {% set question_counter = namespace(value=1) %}
   <div class="question-quiz">
-    <label class="margin">{{ question['questionText'] }}</label>
-      <div class="answers-quiz margin">
-        {% for answer in question['answers'] %}
-        <div class="form-group form-check">
-          <input type="checkbox" class="form-check-input">
-          <label class="form-check-label">{{ answer['answerText'] }}</label>
-        </div>
-        {% endfor %}
+    <label name="{{'question' ~ answer_counter.value}}" class="margin">{{ question['questionText'] }}</label>
+    <div class="answers-quiz margin">
+      {% for answer in question['answers'] %}
+      <div class="form-group form-check">
+        <input name="{{'answer' ~ answer_counter.value ~ '_' ~ question_counter.value}}" type="checkbox"
+          class="form-check-input">
+        <label class="form-check-label">{{ answer['answerText'] }}</label>
       </div>
-
+      {% set question_counter.value = question_counter.value + 1 %}
+      {% endfor %}
+    </div>
   </div>
+  {% set answer_counter.value = answer_counter.value + 1 %}
   {% endfor %}
   <button id="submit" type="submit" class="btn btn-primary">Submit!</button>
 </form>
