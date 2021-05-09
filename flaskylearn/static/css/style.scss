@@ -1,8 +1,8 @@
-$background: hsl(0, 0%, 17%);
-$darker-background: hsl(0, 0%, 10%);
-$text-muted: hsl(0, 0%, 45%);
-$text-color: hsl(0, 0%, 83%);
-$accent-color: hsl(312, 100%, 75%);
+$background        : hsl(0, 0%, 17%);
+$lighter-background: hsl(210, 10%, 23%);
+$text-muted        : hsl(0, 0%, 45%);
+$text-color        : hsl(0, 0%, 83%);
+$accent-color      : hsl(312, 100%, 75%);
 $accent-color-hover: hsl(312, 100%, 68%);
 
 .navbar-logo {
@@ -68,12 +68,13 @@ p {
 
 .btn-primary {
   background-color: $accent-color;
-  border-color: $accent-color;
+  border-color    : $accent-color;
 
-  &:hover {  
+  &:hover {
     background-color: $accent-color-hover;
-    border-color: $accent-color-hover;
+    border-color    : $accent-color-hover;
   }
+
   // fix
   // &:click {  
   //   background-color: $accent-color-hover;
@@ -83,29 +84,38 @@ p {
 
 .quiz {
   button {
-    width: min-content;
-    height: min-content;
-    padding: 1px;
+    width      : min-content;
+    height     : min-content;
+    padding    : 1px;
     margin-left: (1em / 2);
   }
+
   .form-control {
     width: 80%;
   }
 }
 
 .question-quiz {
-  border-radius: (3vw / 2);
-  padding-bottom: 1px;
-  margin-top: 20px;
-  background-color: $darker-background;
+  border-radius   : (3vw / 2);
+  padding         : 5px 0px 1px 0px;
+  margin-top      : 20px;
+  background-color: $lighter-background;
+
   label {
     &:not(.form-check-label) {
       margin-left: 1.1vw;
-      font-size: 24px;
+      font-size  : 24px;
     }
   }
-  
+
   .answers-quiz {
-      margin-left: 1.5vw;
+    margin-left: 1.5vw;
+  }
+}
+
+form {
+  #submit {
+    margin-top: 20px;
+    margin-left: 0.8vw;
   }
 }

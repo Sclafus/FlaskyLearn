@@ -87,9 +87,9 @@ p {
 
 .question-quiz {
   border-radius: 1.5vw;
-  padding-bottom: 1px;
+  padding: 5px 0px 1px 0px;
   margin-top: 20px;
-  background-color: #1a1a1a;
+  background-color: #353b41;
 }
 
 .question-quiz label:not(.form-check-label) {
@@ -99,5 +99,10 @@ p {
 
 .question-quiz .answers-quiz {
   margin-left: 1.5vw;
+}
+
+form #submit {
+  margin-top: 20px;
+  margin-left: 0.8vw;
 }
 /*# sourceMappingURL=style.css.map */
