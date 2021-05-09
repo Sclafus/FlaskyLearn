@@ -57,6 +57,8 @@ def homepage():
         flash('Please do not include _ in your file name!', category='info')
         return redirect(request.url)
 
+    newFile = False
+    
     if file and util.allowedFile(file.filename):
         filename = secure_filename(file.filename)
         path = join(app.config['UPLOAD_FOLDER'], filename)
