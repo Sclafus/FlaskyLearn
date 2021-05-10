@@ -92,7 +92,7 @@ p {
 
 .question-quiz {
   border-radius: 1.5vw;
-  padding: 5px 0 1px 0;
+  padding: 5px 0 1px;
   margin-top: 20px;
   background-color: #353b41;
 }
