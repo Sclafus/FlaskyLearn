@@ -53,7 +53,7 @@ def login():
                 session['email'] = hhmail
                 session['name'] = name
                 if table == 'Contributor':
-                    session['admin']=True
+                    session['admin'] = True
                 print(f"User with email {hhmail} logged in successfully")
                 return redirect(url_for('home'))
 
@@ -87,10 +87,11 @@ def register():
     dbCurr = db.cursor()
 
     # checks if the email has already been used
-    dbCurr.execute("SELECT email FROM Student WHERE email=?", (hhmail, ))
     alreadyRegistered = False
-    for _ in dbCurr:
-        alreadyRegistered = True
+    for table in ['Student', 'Contributor']:
+        dbCurr.execute(f"SELECT email FROM {table} WHERE email=?", (hhmail, ))
+        for _ in dbCurr:
+            alreadyRegistered = True
 
     # Insert data in the database
     if not alreadyRegistered:
@@ -110,28 +111,3 @@ def logout():
     session.clear()
     flash("You have been successfully logged out", category='warning')
     return redirect(url_for('home'))
-
-
-@app.route('/quiz/')
-def quiz():
-    dbCurr = db.cursor()
-    courses = {}
-
-    # getting all the courses, using a cache to improve performance
-    dbCurr.execute("SELECT name, id FROM Course")
-    for courseName, courseID in dbCurr:
-        courses[courseID] = courseName
-
-    enrolled = []
-    try:
-        dbCurr.execute("SELECT id FROM Enrollment WHERE email=?",
-                       (session['email'],))
-    except KeyError:
-        # user not logged in
-        return abort(403)
-    else:
-        # getting the name of the course
-        for courseID in dbCurr:
-            enrolled.append(courses[courseID])
-
-    return render_template('quiz.html', context=enrolled)
