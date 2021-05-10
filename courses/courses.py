@@ -127,13 +127,13 @@ def specificLesson(courseId: int, lessonId: int):
 
     # getting video path
     dbCurr.execute(
-        "SELECT path FROM Composition INNER JOIN Video on Composition.videoid = Video.id WHERE videoid = ? AND courseid=?", (lessonId, courseId))
+        "SELECT path FROM Composition INNER JOIN Video on Composition.videoid = Video.id WHERE lesson = ? AND courseid=?", (lessonId, courseId))
 
     for _path in dbCurr:
         path = _path[0].split('/')
         videoPath = '/'.join(path[-2:])
         folderPath = path[-3]
-    #FIXME something is wrong here!
+        
     return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath, courseId=courseId)
 
 @lru_cache
@@ -141,7 +141,7 @@ def specificLesson(courseId: int, lessonId: int):
 def specificQuiz(courseId: int):
     '''Quiz for the specified course'''
     dbCurr = db.cursor()
-    
+
     # User permission check
     authorized = False
     try:
