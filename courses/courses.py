@@ -140,10 +140,27 @@ def specificLesson(courseId: int, lessonId: int):
 @courses.route('/<int:courseId>/quiz', methods=['POST', 'GET'])
 def specificQuiz(courseId: int):
     '''Quiz for the specified course'''
-    # TODO add user check
+    dbCurr = db.cursor()
+    
+    # User permission check
+    authorized = False
+    try:
+        dbCurr.execute("SELECT timestamp FROM Enrollment WHERE email=? AND id=?", (session['email'], courseId))
+        for _ in dbCurr:
+            authorized = True
+    except KeyError:
+        # User is not logged in
+        pass
+
+    if not authorized:
+        if 'email' not in session:
+            flash("You need to login in order to access this page", category='warning')
+        else:
+            flash("You need to watch all the videos first!", category='warning')
+        return redirect(url_for('courses.specificCourse', courseId=courseId))
+
     # Getting the quiz
     quiz = []
-    dbCurr = db.cursor()
 
     # Getting course name
     dbCurr.execute("SELECT name FROM Course WHERE id=?", (courseId, ))
