@@ -76,8 +76,6 @@ def specificCourse(courseId: int):
     # checks if the user has seen all the lessons or not
     notViewedVideos = [video for video in videos if not video[2]]
     quizAvailable = True if not notViewedVideos else False
-    if quizAvailable and videos:
-        flash("Congratulations, you have finished the course! You can take a brief quiz to obtain your certificate", category='success')
     return render_template('courses/course.html', courseName=courseName, videos=videos, courseId=courseId, quizAvailable=quizAvailable)
 
 
@@ -133,7 +131,7 @@ def specificLesson(courseId: int, lessonId: int):
         path = _path[0].split('/')
         videoPath = '/'.join(path[-2:])
         folderPath = path[-3]
-        
+
     return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath, courseId=courseId)
 
 @lru_cache
@@ -168,19 +166,9 @@ def specificQuiz(courseId: int):
         courseName = _courseName[0]
 
     # getting questions id for the test
-    # TODO optimization, use join instead of two different loops 
-    questionIds = []
-    dbCurr.execute("SELECT questionid FROM Test WHERE courseid=?", (courseId,))
-    for _questionId in dbCurr:
-        questionIds.append(_questionId)
-
-    # getting question text
-    for _questionId in questionIds:
-        dbCurr.execute("SELECT topic FROM Question WHERE id=?", _questionId)
-        for _questionText in dbCurr:
-            questionText = _questionText[0]
-        question = {"questionText": questionText,
-                    "questionId": _questionId[0], "answers": []}
+    dbCurr.execute("SELECT questionid, topic FROM Test INNER JOIN Question ON Test.questionid = Question.id WHERE courseid=?", (courseId,))
+    for questionId, questionText in dbCurr:
+        question = {"questionText": questionText, "questionId": questionId, "answers": []}
         quiz.append(question)
 
     for _question in quiz:
@@ -197,4 +185,7 @@ def specificQuiz(courseId: int):
 
     # GET Request
     if request.method == 'GET':
-        return render_template("courses/quiz.html", courseName=courseName, quiz=quiz)
+        if quiz:
+            return render_template("courses/quiz.html", courseName=courseName, quiz=quiz)
+        flash("The quiz has not been added to this course yet, come back later!", category='warning')
+        return redirect(url_for('courses.specificCourse', courseId=courseId))
