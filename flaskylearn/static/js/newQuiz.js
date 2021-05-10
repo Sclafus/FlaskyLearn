@@ -1,11 +1,11 @@
 
-let inputIndex = 0;
 
+let inputIndex = 0;
 /**
  * Adds a new question
  */
 function addQuestion() {
-
+    
     let section = document.createElement('div');
     section.classList.add('question');
 
@@ -146,6 +146,7 @@ function isFormValid() {
  * @returns false
  */
 function formValidationError(error) {
+    // TODO implement dismissable alert
     // let body = document.getElementsByTagName('BODY')[0];
     console.error(error);
     return false;
@@ -154,11 +155,10 @@ function formValidationError(error) {
 /**
  * submits the for in a json object
  */
-function submitForm() {
+document.getElementById('submit').addEventListener('click', () => {
 
     // form validation
     if (!isFormValid()) {
-        console.log(isFormValid());
         return;
     }
 
@@ -202,4 +202,4 @@ function submitForm() {
                 location.reload();
             })
         })
-}
+});
