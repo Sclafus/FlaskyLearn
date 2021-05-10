@@ -27,6 +27,11 @@ form input {
   color: #d4d4d4;
 }
 
+form #submit {
+  margin-top: 20px;
+  margin-left: 0.8vw;
+}
+
 p {
   color: #d4d4d4;
   margin: 0 1vw;
@@ -99,10 +104,5 @@ p {
 
 .question-quiz .answers-quiz {
   margin-left: 1.5vw;
-}
-
-form #submit {
-  margin-top: 20px;
-  margin-left: 0.8vw;
 }
 /*# sourceMappingURL=style.css.map */

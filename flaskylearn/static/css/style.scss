@@ -32,6 +32,11 @@ form {
   input {
     color: $text-color;
   }
+
+  #submit {
+    margin-top: 20px;
+    margin-left: 0.8vw;
+  }
 }
 
 p {
@@ -110,12 +115,5 @@ p {
 
   .answers-quiz {
     margin-left: 1.5vw;
-  }
-}
-
-form {
-  #submit {
-    margin-top: 20px;
-    margin-left: 0.8vw;
   }
 }
