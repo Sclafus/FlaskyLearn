@@ -92,7 +92,7 @@ def specificLesson(courseId: int, lessonId: int):
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
     try:
-        if not session['enrolled']:
+        if (not session['enrolled'] and not 'admin' in session):
             flash("You need to enroll in the course to see the lessons",
                   category='warning')
             return redirect(url_for('courses.specificCourse', courseId=courseId))
