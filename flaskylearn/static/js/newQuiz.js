@@ -1,11 +1,9 @@
-
-
 let inputIndex = 0;
 /**
  * Adds a new question
  */
 function addQuestion() {
-    
+
     let section = document.createElement('div');
     section.classList.add('question');
 
@@ -141,19 +139,49 @@ function isFormValid() {
 }
 
 /**
- * Error function for form validation
+ * Error function for form validation, adds a dismissable alert with the relative error.
  * @param {string} error that caused the form to be invalid
  * @returns false
  */
 function formValidationError(error) {
-    // TODO implement dismissable alert
-    // let body = document.getElementsByTagName('BODY')[0];
-    console.error(error);
+    // getting body
+    const body = document.getElementsByTagName('BODY')[0];
+
+    // add a new alert if it's not present
+    if (!body.children[1].classList.contains('alert')) {
+        // Creating dismissable alert container
+        let alert = document.createElement('div');
+        alert.classList.add('alert', 'alert-danger', 'alert-dismissible', 'fade', 'show', 'margin');
+        alert.setAttribute('role', 'alert');
+
+        // Creating error message
+        let message = document.createElement('strong');
+        message.innerHTML = error
+
+        // Creating dismiss button
+        let dismissButton = document.createElement('button');
+        dismissButton.type = 'button';
+        dismissButton.classList.add('close');
+        dismissButton.setAttribute('data-dismiss', 'alert');
+        dismissButton.setAttribute('aria-label', 'close');
+
+        // adding span to dismiss button
+        let dismissButtonSpan = document.createElement('span');
+        dismissButtonSpan.setAttribute('aria-hidden', 'true');
+        dismissButtonSpan.innerHTML = '&times;';
+        dismissButton.appendChild(dismissButtonSpan);
+
+        alert.append(message, dismissButton);
+        // adding the dismissable alert to the body
+        body.insertBefore(alert, body.children[1]);
+    } else {
+        body.children[1].firstChild.innerHTML = error;
+    }
     return false;
 }
 
 /**
- * submits the for in a json object
+ * submits the form in a json object
  */
 document.getElementById('submit').addEventListener('click', () => {
 
@@ -170,7 +198,7 @@ document.getElementById('submit').addEventListener('click', () => {
     quiz = { "course": course, "questions": [] };
     for (const question of questions) {
         let tmpQuestion = { question: question.children[0].value, answers: [] };
-        
+
         // filtering
         const answers = Array.from(question.children).filter(ans => ans.classList.contains('answer'));
 
