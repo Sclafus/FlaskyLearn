@@ -117,3 +117,12 @@ p {
     margin-left: 1.5vw;
   }
 }
+
+#quiz {
+  .question {
+    margin-top: 1vh;
+    input{
+      margin-bottom: 5px;
+    }
+  }
+}

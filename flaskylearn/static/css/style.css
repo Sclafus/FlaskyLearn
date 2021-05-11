@@ -105,4 +105,12 @@ p {
 .question-quiz .answers-quiz {
   margin-left: 1.5vw;
 }
+
+#quiz .question {
+  margin-top: 1vh;
+}
+
+#quiz .question input {
+  margin-bottom: 5px;
+}
 /*# sourceMappingURL=style.css.map */
