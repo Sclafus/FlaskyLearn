@@ -10,7 +10,7 @@
     <div class="answers-quiz margin">
       {% for answer in question['answers'] %}
       <div class="form-group form-check">
-        <input name="{{'answer' ~ answer_counter.value ~ '_' ~ question_counter.value}}" type="checkbox"
+        <input name="{{'answer' ~ '_' ~ answer_counter.value ~ '_' ~ question_counter.value}}" type="checkbox"
           class="form-check-input">
         <label class="form-check-label">{{ answer['answerText'] }}</label>
       </div>
