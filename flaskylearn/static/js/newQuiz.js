@@ -42,7 +42,7 @@ function addQuestion() {
  */
 function addAnswer() {
     let section = document.createElement('div');
-    section.classList.add('answer');
+    section.classList.add('answer', 'margin');
 
     let parent = document.getElementById(this.id).parentElement;
 
@@ -97,7 +97,9 @@ function deleteAnswer() {
 function isFormValid() {
     // getting the data
     const questions = document.getElementById('quiz').children;
-
+    if (questions.length <= 0){
+        return formValidationError("You need to add at least a question!");
+    }
     // checking that every question has at least two answers and at least one of them is correct
     for (const question of questions) {
         let flagCorrect = false;
