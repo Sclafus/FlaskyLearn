@@ -44,14 +44,15 @@ def login():
     for table in ['Student', 'Contributor']:
 
         dbCurr.execute(
-            f"SELECT password, name FROM {table} WHERE Email=?", (hhmail,))
+            f"SELECT password, name, surname FROM {table} WHERE Email=?", (hhmail,))
 
-        for (passwd, name) in dbCurr:
+        for passwd, name, surname in dbCurr:
             hasResult = True
             if passwd == hhpass:
                 # both password and email are valid, logging in
                 session['email'] = hhmail
                 session['name'] = name
+                session['surname'] = surname
                 if table == 'Contributor':
                     session['admin'] = True
                 print(f"User with email {hhmail} logged in successfully")
