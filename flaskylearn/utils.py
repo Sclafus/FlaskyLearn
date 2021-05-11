@@ -1,6 +1,7 @@
 import mariadb
 from Crypto.Hash import SHA3_256
 from datetime import datetime
+import pdfkit
 
 
 class Utils:
@@ -40,8 +41,13 @@ class Utils:
         return None
 
     def getTimestamp(self):
+        '''Returns the timestamp right now'''
         return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     def getEnv(self) -> dict:
         '''Returns the env'''
         return self._env
+
+    def generatePDF(self, htmlTemplate):
+        '''generates PDF for the specified name and course'''
+        return pdfkit.from_string(htmlTemplate, False)
