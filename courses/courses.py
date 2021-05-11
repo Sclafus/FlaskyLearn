@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, session, flash, redirect, url_for
+from flask import Blueprint, render_template, request, session, flash, redirect, url_for, make_response
 from flaskylearn import db, util
 from datetime import datetime
 from functools import lru_cache
@@ -134,6 +134,7 @@ def specificLesson(courseId: int, lessonId: int):
 
     return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath, courseId=courseId)
 
+
 @lru_cache
 @courses.route('/<int:courseId>/quiz', methods=['POST', 'GET'])
 def specificQuiz(courseId: int):
@@ -143,7 +144,8 @@ def specificQuiz(courseId: int):
     # User permission check
     authorized = False
     try:
-        dbCurr.execute("SELECT timestamp FROM Enrollment WHERE email=? AND id=?", (session['email'], courseId))
+        dbCurr.execute(
+            "SELECT timestamp FROM Enrollment WHERE email=? AND id=?", (session['email'], courseId))
         for _ in dbCurr:
             authorized = True
     except KeyError:
@@ -152,7 +154,8 @@ def specificQuiz(courseId: int):
 
     if not authorized:
         if 'email' not in session:
-            flash("You need to login in order to access this page", category='warning')
+            flash("You need to login in order to access this page",
+                  category='warning')
         else:
             flash("You need to watch all the videos first!", category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
@@ -166,9 +169,11 @@ def specificQuiz(courseId: int):
         courseName = _courseName[0]
 
     # getting questions id for the test
-    dbCurr.execute("SELECT questionid, topic FROM Test INNER JOIN Question ON Test.questionid = Question.id WHERE courseid=?", (courseId,))
+    dbCurr.execute(
+        "SELECT questionid, topic FROM Test INNER JOIN Question ON Test.questionid = Question.id WHERE courseid=?", (courseId,))
     for questionId, questionText in dbCurr:
-        question = {"questionText": questionText, "questionId": questionId, "answers": []}
+        question = {"questionText": questionText,
+                    "questionId": questionId, "answers": []}
         quiz.append(question)
 
     for _question in quiz:
@@ -180,12 +185,25 @@ def specificQuiz(courseId: int):
 
     # POST Request
     if request.method == 'POST':
-        print(request.form)
-        return (request.form)
+        # TODO check answers
+        # print(request.form)
+
+        testPassed = True
+        if testPassed:
+            
+            pdf = util.generatePDF(render_template(
+                'courses/pdfTemplate.html', name=session['name'], surname=session['surname'], course=courseName))
+            
+            response = make_response(pdf)
+            response.headers['Content-Type'] = 'application/pdf'
+            response.headers['Content-Disposition'] = f'inline; filename={courseName}_{session["name"]}_{session["surname"]}.pdf'
+            flash("Congratulations! You passed the test, generating your certification...", category="success")
+            return response
 
     # GET Request
     if request.method == 'GET':
         if quiz:
             return render_template("courses/quiz.html", courseName=courseName, quiz=quiz)
-        flash("The quiz has not been added to this course yet, come back later!", category='warning')
+        flash("The quiz has not been added to this course yet, come back later!",
+              category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
