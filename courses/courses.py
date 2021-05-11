@@ -186,10 +186,17 @@ def specificQuiz(courseId: int):
     # POST Request
     if request.method == 'POST':
         # TODO check answers
-        # print(request.form)
+        print(quiz)
+        answers = request.form.to_dict()
 
-        testPassed = True
-        if testPassed:
+        #converting 'on' and 'off' values to boolean
+        for key, value in answers.items():
+            answers[key] = True if value == 'on' else False
+        
+        print(answers)
+        
+        testOutcome = util.quizChecker(quiz, answers, 60)
+        if testOutcome:
             
             pdf = util.generatePDF(render_template(
                 'courses/pdfTemplate.html', name=session['name'], surname=session['surname'], course=courseName))

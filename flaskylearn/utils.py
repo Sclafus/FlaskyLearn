@@ -48,6 +48,21 @@ class Utils:
         '''Returns the env'''
         return self._env
 
-    def generatePDF(self, htmlTemplate):
+    def generatePDF(self, htmlTemplate: str):
         '''generates PDF for the specified name and course'''
         return pdfkit.from_string(htmlTemplate, False)
+
+    def quizChecker(self, quiz: list, responses: dict, threshold: int) -> bool:
+        '''checks if the specified quiz and the given responses meet the threshold'''
+        # TODO calculate the minimum amount of questions to pass
+        # this method will be quite complex, i need time
+        questionNum = len(quiz)
+        questionIndex = 1
+        for question in quiz:
+            answers = question['answers']
+            for key in responses:
+                if key[7] == str(questionIndex):
+                    # to implement
+                    print('hi')
+            questionIndex += 1
+        return True
