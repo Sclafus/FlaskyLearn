@@ -185,27 +185,22 @@ def specificQuiz(courseId: int):
 
     # POST Request
     if request.method == 'POST':
-        # TODO check answers
-        print(quiz)
-        answers = request.form.to_dict()
 
-        #converting 'on' and 'off' values to boolean
+        # converting 'on' and 'off' values to boolean
+        answers = request.form.to_dict()
         for key, value in answers.items():
             answers[key] = True if value == 'on' else False
-        
-        print(answers)
-        
-        testOutcome = util.quizChecker(quiz, answers, 60)
-        if testOutcome:
-            
-            pdf = util.generatePDF(render_template(
-                'courses/pdfTemplate.html', name=session['name'], surname=session['surname'], course=courseName))
-            
-            response = make_response(pdf)
-            response.headers['Content-Type'] = 'application/pdf'
-            response.headers['Content-Disposition'] = f'inline; filename={courseName}_{session["name"]}_{session["surname"]}.pdf'
-            flash("Congratulations! You passed the test, generating your certification...", category="success")
-            return response
+
+        score, testPassed = util.quizChecker(quiz, answers, 60)
+        if testPassed:
+            flash(f'Congratulations, you passed the test with a score of {score}! Download the certificate with the button below!',
+                  category='success')
+        else:
+            flash(
+                f'Your score was {score}, you almost got it! Try again next time', category='danger')
+        session['courseName'] = courseName
+        session['score'] = score
+        return redirect(url_for('courses.quizOutcome', courseId=courseId))
 
     # GET Request
     if request.method == 'GET':
@@ -214,3 +209,29 @@ def specificQuiz(courseId: int):
         flash("The quiz has not been added to this course yet, come back later!",
               category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
+
+
+@courses.route('/<int:courseId>/quiz/outcome', methods=['GET', 'POST'])
+def quizOutcome(courseId: int):
+
+    if request.method == 'GET':
+        try:
+            isPassed = True if session['score'] >= 60 else False
+            return render_template('courses/quizOutcome.html', isPassed=isPassed, courseId=courseId)
+        except KeyError:
+            return render_template('courses/quizOutcome.html', courseId=courseId)
+    if request.method == 'POST':
+        try:
+            pdf = util.generatePDF(render_template(
+                'courses/pdfTemplate.html', name=session['name'], surname=session['surname'], course=session['courseName'], ))
+
+            response = make_response(pdf)
+            response.headers['Content-Type'] = 'application/pdf'
+            response.headers['Content-Disposition'] = f'inline; filename={session["courseName"]}_{session["name"]}_{session["surname"]}.pdf'
+
+            # clearing cookie data
+            session.pop('courseName')
+            session.pop('score')
+            return response
+        except KeyError:
+            return redirect(url_for('courses.specificCourse', courseId=courseId))

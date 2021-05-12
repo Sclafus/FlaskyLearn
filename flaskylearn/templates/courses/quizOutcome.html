@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}
+  {% if isPassed %}
+          Congratulations!
+  {% else %}
+          Oh no...
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  <br>
+  <a class="btn margin btn-primary" href="{{ url_for('courses.specificCourse', courseId=courseId)}}">Back</a>
+  <br>
+  <br>
+  {% if isPassed %}
+    <form method="post">
+      <button type="submit" class="btn btn-primary">Download now!</button>
+    </form>
+  {% endif %}
+{% endblock %}
