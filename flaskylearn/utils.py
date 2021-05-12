@@ -52,17 +52,33 @@ class Utils:
         '''generates PDF for the specified name and course'''
         return pdfkit.from_string(htmlTemplate, False)
 
-    def quizChecker(self, quiz: list, responses: dict, threshold: int) -> bool:
+    def quizChecker(self, quiz: list, responses: dict, threshold: int) -> (int, bool):
         '''checks if the specified quiz and the given responses meet the threshold'''
-        # TODO calculate the minimum amount of questions to pass
-        # this method will be quite complex, i need time
-        questionNum = len(quiz)
+        # Calculating the points per question
+        pointPerQuestion = 100 / len(quiz)
+        points = 0
+
         questionIndex = 1
         for question in quiz:
+            wrongAnswers = 0
+            rightAnswers = 0
             answers = question['answers']
             for key in responses:
-                if key[7] == str(questionIndex):
-                    # to implement
-                    print('hi')
+                if key[-3] == str(questionIndex):
+                    answer = responses[key]
+                    isCorrect = answers[int(key[-1])-1]['answerCorrect']
+
+                    if answer == isCorrect:
+                        rightAnswers += 1
+                    else:
+                        wrongAnswers += 1
+            try:
+                points += (rightAnswers * pointPerQuestion) / \
+                    (rightAnswers + wrongAnswers)
+            except ZeroDivisionError:
+                # no answer given
+                pass
             questionIndex += 1
-        return True
+        if points >= threshold:
+            return points, True
+        return points, False
