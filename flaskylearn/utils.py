@@ -50,7 +50,7 @@ class Utils:
 
     def generatePDF(self, htmlTemplate: str):
         '''generates PDF for the specified name and course'''
-        return pdfkit.from_string(htmlTemplate, False)
+        return pdfkit.from_string(htmlTemplate, False, options={'quiet': ''})
 
     def quizChecker(self, quiz: list, responses: dict, threshold: int) -> (int, bool):
         '''checks if the specified quiz and the given responses meet the threshold'''
