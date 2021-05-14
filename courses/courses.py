@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, session, flash, redirect, url_for, make_response
-from flaskylearn import db, util
+from flaskylearn import db, util, nullTuple
 from datetime import datetime
 from functools import lru_cache
 courses = Blueprint("courses", __name__,
@@ -13,8 +13,8 @@ def homepage():
     courses = []
 
     dbCurr.execute("SELECT * FROM Course")
-    for courseid, name, duration, description in dbCurr:
-        courses.append((courseid, name, duration, description))
+    for course in dbCurr:
+        courses.append(course)
     return render_template('courses/courses.html', context=courses)
 
 
@@ -25,9 +25,13 @@ def specificCourse(courseId: int):
 
     # POST request = a user is trying to enroll in the course
     if request.method == 'POST':
-        dbCurr.execute("INSERT INTO Enrollment VALUES (?, ?, ?)",
-                       (session['email'], courseId, util.getTimestamp()))
-        flash("You have been enrolled successfully", category='success')
+        try:
+            dbCurr.execute("INSERT INTO Enrollment VALUES (?, ?, ?)",
+                           (session['email'], courseId, util.getTimestamp()))
+            flash("You have been enrolled successfully", category='success')
+        except KeyError:
+            flash("You need to login in order to enroll in this course!",
+                  category='danger')
         return redirect(request.url)
 
     # GET request
@@ -40,10 +44,10 @@ def specificCourse(courseId: int):
 
     # Getting all the lessons for the specified course
     dbCurr.execute(
-        "SELECT DISTINCT lesson, description FROM Composition INNER JOIN Video ON Video.id = Composition.videoid WHERE Composition.courseid = ?", (courseId,))
+        "SELECT lesson, description FROM Composition INNER JOIN Video ON Video.id = Composition.videoid WHERE Composition.courseid = ? ORDER BY lesson", (courseId,))
 
-    for lesson, description in dbCurr:
-        lessons.append((lesson, description))
+    for lesson in dbCurr:
+        lessons.append(lesson)
 
     # checking if the lesson has already been viewed
     for lesson, description in lessons:
@@ -51,8 +55,8 @@ def specificCourse(courseId: int):
 
         try:
             dbCurr.execute(
-                "SELECT id FROM Visualization WHERE id=? AND email=?", (lesson, session['email']))
-            for _ in dbCurr:
+                "SELECT EXISTS (SELECT id FROM Visualization WHERE id=? AND email=?)", (lesson, session['email']))
+            if dbCurr.next() != nullTuple:
                 flag = True
         except KeyError:
             # user not logged in
@@ -64,9 +68,9 @@ def specificCourse(courseId: int):
     session['enrolled'] = False
     try:
         dbCurr.execute(
-            "SELECT timestamp FROM Enrollment WHERE email=? AND id=?", (session['email'], courseId))
+            "SELECT EXISTS (SELECT timestamp FROM Enrollment WHERE email=? AND id=?)", (session['email'], courseId))
 
-        for _ in dbCurr:
+        if dbCurr.next() != nullTuple:
             session['enrolled'] = True
 
     except KeyError:
@@ -145,19 +149,18 @@ def specificQuiz(courseId: int):
     authorized = False
     try:
         dbCurr.execute(
-            "SELECT timestamp FROM Enrollment WHERE email=? AND id=?", (session['email'], courseId))
-        for _ in dbCurr:
+            "SELECT EXISTS(SELECT timestamp FROM Enrollment WHERE email=? AND id=?)", (session['email'], courseId))
+        if dbCurr.next() != nullTuple:
             authorized = True
+
     except KeyError:
         # User is not logged in
-        pass
+        flash("You need to login in order to access this page",
+              category='warning')
+        return redirect(url_for('courses.specificCourse', courseId=courseId))
 
     if not authorized:
-        if 'email' not in session:
-            flash("You need to login in order to access this page",
-                  category='warning')
-        else:
-            flash("You need to watch all the videos first!", category='warning')
+        flash("You need to watch all the videos first!", category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
     # Getting the quiz
