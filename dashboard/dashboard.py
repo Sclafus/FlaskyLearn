@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session, abort, redirect, flash, url_for, jsonify, make_response
 from werkzeug.utils import secure_filename
-from flaskylearn import db, util, app
+from flaskylearn import db, util, app, nullTuple
 
 from os.path import join, isfile
 from os import listdir
@@ -14,34 +14,34 @@ dashboard = Blueprint("dashboard", __name__,
 def homepage():
     '''Displays the dashboard only for authorized users (aka contributors)'''
 
-    authorized = False
-
     # checks if the user is authenticated
+    authorized = False
     if 'email' in session:
         dbCurr = db.cursor()
-        dbCurr.execute("SELECT email FROM Contributor WHERE Email=?",
+        dbCurr.execute("SELECT EXISTS(SELECT email FROM Contributor WHERE email=?)",
                        (session['email'], ))
 
         # let's check if the user is authenticated
-        for _ in dbCurr:
+        if dbCurr.next() != nullTuple:
             authorized = True
 
-    if not authorized:
-        # if not authorized, forbidden
+    # if not authorized or logged, forbidden
+    if ((not authorized) or ('email' not in session)):
         return abort(403)
 
     # AUTHORIZED
 
-    if request.method != 'POST':
-        # getting the couses available
-        courses = []
-        dbCurr.execute("SELECT name FROM Course")
-        for courseName in dbCurr:
-            courses.append(courseName[0])
+    # getting the couses
+    courses = []
+    dbCurr.execute("SELECT id, name FROM Course")
+    for _course in dbCurr:
+        courses.append(_course)
+
+    # GET Request
+    if request.method == 'GET':
         return render_template('dashboard/dashboard.html', context=courses)
 
     # POST request = new video upload
-
     # File checks
     if 'video' not in request.files:
         return redirect(request.url)
@@ -52,13 +52,14 @@ def homepage():
         flash('No file selected', category='warning')
         return redirect(request.url)
 
-    # handles _ char
-    if '_' in file.filename:
-        flash('Please do not include _ in your file name!', category='info')
+    # handles _ and space char
+    if [True for match in file.filename if match in [' ', '_']]:
+        flash('Please do not include _ or spaces in your file name!',
+              category='warning')
         return redirect(request.url)
 
     newFile = False
-    
+
     if file and util.allowedFile(file.filename):
         filename = secure_filename(file.filename)
         path = join(app.config['UPLOAD_FOLDER'], filename)
@@ -83,24 +84,18 @@ def homepage():
             "INSERT INTO Video (description, path) VALUES (?, ?)", (description, path))
 
         # getting video ID
-        dbCurr.execute(
-            "SELECT id FROM Video WHERE description=? AND path=?", (description, path))
-        for _videoIDTuple in dbCurr:
-            videoID = _videoIDTuple[0]
+        videoId = dbCurr.lastrowid
 
         # getting course ID
-        dbCurr.execute("SELECT id FROM Course WHERE name=?",
-                       (request.form['course'],))
-        for _courseIDTuple in dbCurr:
-            courseID = _courseIDTuple[0]
+        courseId = request.form['course']
 
         # insert new video in release table
         dbCurr.execute(f"INSERT INTO {util.getEnv()['dbSchema']}.Release VALUES (?, ?, ?)",
-                       (session['email'], videoID, util.getTimestamp()))
+                       (session['email'], videoId, util.getTimestamp()))
 
         # insert new video in the course
         dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",
-                       (videoID, courseID, int(request.form['lessonNum'])))
+                       (videoId, courseId, int(request.form['lessonNum'])))
 
     return redirect(request.url)
 
@@ -112,8 +107,8 @@ def newCourse():
     if 'email' in session:
         dbCurr = db.cursor()
         dbCurr.execute(
-            'SELECT email FROM Contributor WHERE email=?', (session['email'],))
-        for _ in dbCurr:
+            'SELECT EXISTS(SELECT email FROM Contributor WHERE email=?)', (session['email'],))
+        if dbCurr.next() != nullTuple:
             authorized = True
 
     if ((not authorized) or ('email' not in session)):
@@ -177,6 +172,7 @@ def newQuiz():
                                (questionId, answerId, answer['correct']))
 
         # Getting the response back
-        response = make_response(jsonify({'message' : 'The quiz has been submitted correctly!'}), 200)
+        response = make_response(
+            jsonify({'message': 'The quiz has been submitted correctly!'}), 200)
         flash("The quiz has been submitted correctly!", category='success')
         return response

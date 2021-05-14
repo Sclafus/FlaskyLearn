@@ -30,7 +30,7 @@ app.config['UPLOAD_FOLDER'] = env['uploadFolder']
 # utils obj and db connection
 util = Utils(env)
 db = util.dbConnect()
-
+nullTuple = (0,)
 from flaskylearn import routes
 from courses.courses import courses
 from errors.errors import errors

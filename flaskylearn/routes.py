@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash, session, abort
-from flaskylearn import db, util, app, env
+from flaskylearn import db, util, app, env, nullTuple
 from datetime import timedelta
 
 
@@ -8,6 +8,10 @@ from datetime import timedelta
 @app.route('/')
 def home():
     '''Renders the homepage template'''
+    dbCurr = db.cursor()
+    dbCurr.execute("SELECT EXISTS(SELECT * FROM Answer)")
+    if dbCurr.next() != nullTuple:
+        print('a')
     return render_template('index.html')
 
 
@@ -44,7 +48,7 @@ def login():
     for table in ['Student', 'Contributor']:
 
         dbCurr.execute(
-            f"SELECT password, name, surname FROM {table} WHERE Email=?", (hhmail,))
+            f"SELECT password, name, surname FROM {table} WHERE email=?", (hhmail,))
 
         for passwd, name, surname in dbCurr:
             hasResult = True
@@ -72,7 +76,7 @@ def login():
 def register():
     '''Register to the Student table'''
 
-    if request.method != 'POST':
+    if request.method == 'GET':
         return render_template('register.html')
 
     # get data from form
@@ -90,25 +94,25 @@ def register():
     # checks if the email has already been used
     alreadyRegistered = False
     for table in ['Student', 'Contributor']:
-        dbCurr.execute(f"SELECT email FROM {table} WHERE email=?", (hhmail, ))
-        for _ in dbCurr:
+        dbCurr.execute(f"SELECT EXISTS(SELECT email FROM {table} WHERE email=?)", (hhmail, ))
+        if dbCurr.next() != (0,):
             alreadyRegistered = True
 
-    # Insert data in the database
-    if not alreadyRegistered:
-        dbCurr.execute(
-            "INSERT INTO Student (email, password, name, surname) VALUES (?, ?, ?, ?)", (hhmail, util.doubleHash(password), name, surname))
-        flash("You have been registered. You can now login!", category='success')
-        return redirect(url_for('login'))
+    if alreadyRegistered:
+        # flashing message if the email is already present
+        flash('This email has already been used.', category='warning')
+        return redirect(request.url)
 
-    # flashing message if the email is already present
-    flash('This email has already been used.', category='warning')
-    return redirect(request.url)
+    # Insert new Student in the database
+    dbCurr.execute(
+        "INSERT INTO Student VALUES (?, ?, ?, ?)", (hhmail, name, surname, util.doubleHash(password)))
+    flash("You have been registered. You can now login!", category='success')
+    return redirect(url_for('login'))
 
 
 @app.route('/logout/')
 def logout():
     ''' Deletes all the session data'''
     session.clear()
-    flash("You have been successfully logged out", category='warning')
+    flash("You have been successfully logged out", category='success')
     return redirect(url_for('home'))

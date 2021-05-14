@@ -22,7 +22,7 @@
     <label for="course">Select the course</label>
     <select class="form-control" name="course" id="course" required>
       {% for element in context: %}
-      <option value='{{element}}'>{{element}}</option>
+        <option value='{{element[0]}}'>{{element[1]}}</option>
       {% endfor %}
     </select>
   </div>
