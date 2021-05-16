@@ -147,10 +147,10 @@ function isFormValid() {
  */
 function formValidationError(error) {
     // getting body
-    const body = document.getElementsByTagName('BODY')[0];
+    const alertWrapper = document.getElementById('alert');
 
     // add a new alert if it's not present
-    if (!body.children[1].classList.contains('alert')) {
+    if (alertWrapper.children.length === 0) {
         // Creating dismissable alert container
         let alert = document.createElement('div');
         alert.classList.add('alert', 'alert-danger', 'alert-dismissible', 'fade', 'show', 'margin');
@@ -175,9 +175,9 @@ function formValidationError(error) {
 
         alert.append(message, dismissButton);
         // adding the dismissable alert to the body
-        body.insertBefore(alert, body.children[1]);
+        alertWrapper.appendChild(alert);
     } else {
-        body.children[1].firstChild.innerHTML = error;
+        alertWrapper.children[0].children[0].innerHTML = error;
     }
     return false;
 }
@@ -211,7 +211,6 @@ document.getElementById('submit').addEventListener('click', () => {
 
         quiz.questions.push(tmpQuestion);
     }
-
     // sending the data to the server
     fetch(`${window.location}`, {
         method: "POST",
