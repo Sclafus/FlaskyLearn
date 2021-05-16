@@ -134,5 +134,9 @@ p {
   width: 100%;
   z-index: 999;
   border-radius: 0px;
-  // display: none;
+}
+
+.alert-dark {
+  background-color: $lighter-background;
+  border-color: transparent;
 }

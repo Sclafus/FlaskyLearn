@@ -122,4 +122,9 @@ p {
   z-index: 999;
   border-radius: 0px;
 }
+
+.alert-dark {
+  background-color: #353b41;
+  border-color: transparent;
+}
 /*# sourceMappingURL=style.css.map */
