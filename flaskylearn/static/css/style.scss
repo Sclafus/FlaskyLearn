@@ -34,7 +34,7 @@ form {
   }
 
   #submit {
-    margin-top: 20px;
+    margin-top : 20px;
     margin-left: 0.8vw;
   }
 }
@@ -79,12 +79,6 @@ p {
     background-color: $accent-color-hover;
     border-color    : $accent-color-hover;
   }
-
-  // fix
-  // &:click {  
-  //   background-color: $accent-color-hover;
-  //   border-color: $accent-color-hover;
-  // }
 }
 
 .quiz {
@@ -121,22 +115,49 @@ p {
 #quiz {
   .question {
     margin-top: 1vh;
-    input{
+
+    input {
       margin-bottom: 5px;
     }
   }
 }
 
 .nk-cookie-banner {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 999;
+  position     : fixed;
+  bottom       : 0;
+  left         : 0;
+  width        : 100%;
+  z-index      : 999;
   border-radius: 0;
 }
 
 .alert-dark {
   background-color: $lighter-background;
-  border-color: transparent;
+  border-color    : transparent;
+}
+
+.video {
+  max-width : 60%;
+  display   : block;
+  margin    : 0 auto;
+  margin-top: 30px;
+  height    : auto;
+}
+
+.alert {
+  margin-top: 6px;
+}
+
+.form-group {
+  label {
+    margin-top: 3px;
+  }
+}
+
+.padded {
+  margin-top: 8px;
+}
+
+.back {
+  margin-top: 15px;
 }

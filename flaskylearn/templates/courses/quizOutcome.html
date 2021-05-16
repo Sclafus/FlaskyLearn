@@ -8,8 +8,7 @@
 {% endblock %}
 
 {% block content %}
-  <br>
-  <a class="btn margin btn-primary" href="{{ url_for('courses.specificCourse', courseId=courseId)}}">Back</a>
+  <a class="btn margin btn-primary back" href="{{ url_for('courses.specificCourse', courseId=courseId)}}">Back</a>
   <br>
   <br>
   {% if isPassed %}

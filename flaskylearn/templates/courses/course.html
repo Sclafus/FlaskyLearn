@@ -2,17 +2,16 @@
 {% block title %} {{courseName}} - Lessons {% endblock %}
 {% block content %}
 
-<br>
-<a class="btn btn-primary margin" href="{{ url_for('courses.homepage')}}">Back</a>
+<a class="btn btn-primary margin back" href="{{ url_for('courses.homepage')}}">Back</a>
 
 {% if ((session['enrolled'] == False) and (not session['admin']) )%}
   <form action="#" method="post">
-    <button type="submit" class="btn btn-primary">Enroll to this course</button>
+    <button type="submit" class="btn btn-primary padded">Enroll to this course</button>
   </form>
 {% endif %}
 
 {% if quizAvailable and videos%}
-  <a class="btn btn-primary margin" href="{{ url_for('courses.specificQuiz', courseId=courseId)}}">Quiz</a>
+  <a class="btn btn-primary margin back" href="{{ url_for('courses.specificQuiz', courseId=courseId)}}">Quiz</a>
 {% endif %}
 
 
