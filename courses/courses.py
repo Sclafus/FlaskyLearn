@@ -44,18 +44,18 @@ def specificCourse(courseId: int):
 
     # Getting all the lessons for the specified course
     dbCurr.execute(
-        "SELECT lesson, description FROM Composition INNER JOIN Video ON Video.id = Composition.videoid WHERE Composition.courseid = ? ORDER BY lesson", (courseId,))
+        "SELECT videoid, lesson, description FROM Composition INNER JOIN Video ON Video.id = Composition.videoid WHERE Composition.courseid = ? ORDER BY lesson", (courseId,))
 
     for lesson in dbCurr:
         lessons.append(lesson)
 
     # checking if the lesson has already been viewed
-    for lesson, description in lessons:
+    for videoid, lesson, description in lessons:
         flag = False
 
         try:
             dbCurr.execute(
-                "SELECT EXISTS (SELECT id FROM Visualization WHERE id=? AND email=?)", (lesson, session['email']))
+                "SELECT EXISTS (SELECT id FROM Visualization WHERE id=? AND email=?)", (videoid, session['email']))
             if dbCurr.next() != nullTuple:
                 flag = True
         except KeyError:
