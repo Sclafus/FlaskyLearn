@@ -86,6 +86,25 @@
       {% endif %}
     {% endwith %}
 
+    <!-- cookie notice -->
+    <div class="nk-cookie-banner alert alert-dark text-center mb-0" role="alert">
+      🍪 This website uses cookies to ensure you get the best experience on our website.
+      {# <a href="/privacy/" target="blank" rel="noopener noreferrer">Learn more</a> #}
+      <button type="button" id="cookieAccept" class="btn btn-primary btn-sm ml-3">
+        I Got It
+      </button>
+    </div>
+    <script>
+      const cookieNotice = document.getElementById("cookieAccept").parentElement;
+      if (document.cookie == 'cookie=true'){
+        cookieNotice.style = "display: none";
+      } else {
+        cookieNotice.children[0].addEventListener('click', () => {
+          document.cookie = "cookie=true";
+          cookieNotice.style = "display: none";
+        });
+      } 
+    </script>
     {% block content %} {% endblock %}
 </body>
 {% block scripts%}

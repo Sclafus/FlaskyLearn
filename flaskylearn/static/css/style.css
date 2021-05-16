@@ -113,4 +113,13 @@ p {
 #quiz .question input {
   margin-bottom: 5px;
 }
+
+.nk-cookie-banner {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  z-index: 999;
+  border-radius: 0px;
+}
 /*# sourceMappingURL=style.css.map */
