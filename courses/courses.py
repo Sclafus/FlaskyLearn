@@ -196,12 +196,13 @@ def specificQuiz(courseId: int):
 
         score, testPassed = util.quizChecker(quiz, answers, 60)
         if testPassed:
-            flash(f'Congratulations, you passed the test with a score of {score}! Download the certificate with the button below!',
+            flash(f'Congratulations, you passed the test with a score of {score}, great job! Download your certification with the button below!',
                   category='success')
         else:
             flash(
                 f'Your score was {score}, you almost got it! Try again next time', category='danger')
         session['courseName'] = courseName
+        session['courseId'] = courseId
         session['score'] = score
         return redirect(url_for('courses.quizOutcome', courseId=courseId))
 
@@ -225,12 +226,24 @@ def quizOutcome(courseId: int):
             return render_template('courses/quizOutcome.html', courseId=courseId)
     if request.method == 'POST':
         try:
-            pdf = util.generatePDF(render_template(
-                'courses/pdfTemplate.html', name=session['name'], surname=session['surname'], course=session['courseName'], ))
+            # getting course description
+            dbCurr = db.cursor()
+            dbCurr.execute(
+                "SELECT description FROM Course WHERE id=?", (courseId,))
+
+            data = {
+                'name': session['name'],
+                'surname': session['surname'],
+                'course': session['courseName'],
+                'timestamp': util.getTimestamp()[:10],
+                'description': dbCurr.next()[0]
+            }
+
+            pdf = util.generatePDF(render_template('courses/pdfTemplate.html', data=data))
 
             response = make_response(pdf)
             response.headers['Content-Type'] = 'application/pdf'
-            response.headers['Content-Disposition'] = f'inline; filename={session["courseName"]}_{session["name"]}_{session["surname"]}.pdf'
+            response.headers['Content-Disposition'] = f'inline; filename={data["course"]}_{data["name"]}_{data["surname"]}.pdf'
 
             # clearing cookie data
             session.pop('courseName')
