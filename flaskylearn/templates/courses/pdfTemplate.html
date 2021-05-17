@@ -1,50 +1,40 @@
+
+<head>
+    <meta charset="utf-8">
+</head>
+
 <h1 id="cert-title">
     Certificate of Proficiency
-  </h1>
-  <br><br><br><br>
-  
-  <p class="smaller" id="cert-declaration">
+</h1>
+<br><br><br><br>
+
+<p class="smaller" id="cert-declaration">
     THIS IS TO CERTIFY THAT
-  </p>
-  
-  <h1 id="cert-holder">
-    {{name}} {{surname}}
-  </h1>
-  
-  <p class="smaller" id='cert-completed-line'>
+</p>
+
+<h1 id="cert-holder">
+    {{data['name']}} {{data['surname']}}
+</h1>
+
+<p class="smaller" id='cert-completed-line'>
     has successfully completed the course
-  </p>
-  
-  <h2 id="cert-course">
-    {{course}}
-  </h2>
-  
-  <div id="cert-desc"
-    <p class="smaller" id='cert-details'>
+</p>
+
+<h2 id="cert-course">
+    {{data['course']}}
+</h2>
+
+<div id="cert-desc" <p class="smaller" id='cert-details'>
+    {{data['description']}}
     </p>
-  </div>
-  
-  <br>
-  <p id="cert-from" class="smaller">
-    &nbsp; from www.companywebsite.com
-  </p>
-  
-  <br>
-  <p class="smaller" id='cert-issued'>
-   <b>Issued on:</b> {{date}}.
-  </p>
-  
-  {#
-  <div id="cert-footer">
-    <div id="cert-issued-by">
-      <img id="cert-stamp" src="https://i7.pngguru.com/preview/585/794/452/paper-rubber-stamp-postage-stamps-company-seal-seal-thumbnail.jpg">
-      <hr>
-      <p>Issued by<br>THE COMPANY S.L.</p>
-    </div>
-    <div id="cert-ceo-design">
-      <img id="cert-ceo-sign" src="https://i7.pngguru.com/preview/585/794/452/paper-rubber-stamp-postage-stamps-company-seal-seal-thumbnail.jpg">
-      <hr>
-      <p>Company Ceo<br>CEO of The Company</p>
-    </div>
-  </div>
-  #}
+</div>
+
+<br>
+<p id="cert-from" class="smaller">
+    &nbsp; from www.github.com/Sclafus/flaskylearn
+</p>
+
+<br>
+<p class="smaller" id='cert-issued'>
+    <b>Issued on:</b> {{data['timestamp']}}
+</p>
