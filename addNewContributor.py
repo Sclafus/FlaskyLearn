@@ -27,11 +27,10 @@ def main():
     #hashing the sensitive informations
     hhmail = util.doubleHash(email)
     hhpassword = util.doubleHash(password)
-    hhsurname = util.doubleHash(surname)
 
     #add contributor manually
     dbCurr.execute("INSERT INTO Contributor (email, password, name, surname) VALUES (?, ?, ?, ?)",
-    (hhmail, hhpassword, name, hhsurname))
+    (hhmail, hhpassword, name, surname))
     db.close()
     
 
