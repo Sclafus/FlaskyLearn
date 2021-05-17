@@ -8,10 +8,6 @@ from datetime import timedelta
 @app.route('/')
 def home():
     '''Renders the homepage template'''
-    dbCurr = db.cursor()
-    dbCurr.execute("SELECT EXISTS(SELECT * FROM Answer)")
-    if dbCurr.next() != nullTuple:
-        print('a')
     return render_template('index.html')
 
 
