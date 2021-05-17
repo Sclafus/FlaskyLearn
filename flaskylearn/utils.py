@@ -2,6 +2,7 @@ import mariadb
 from Crypto.Hash import SHA3_256
 from datetime import datetime
 import pdfkit
+from math import trunc
 
 
 class Utils:
@@ -50,7 +51,11 @@ class Utils:
 
     def generatePDF(self, htmlTemplate: str):
         '''generates PDF for the specified name and course'''
-        return pdfkit.from_string(htmlTemplate, False, options={'quiet': ''})
+        options = {
+            'quiet': '',
+            'orientation': 'landscape'
+        }
+        return pdfkit.from_string(htmlTemplate, False, options=options)
 
     def quizChecker(self, quiz: list, responses: dict, threshold: int) -> (int, bool):
         '''checks if the specified quiz and the given responses meet the threshold'''
@@ -79,6 +84,7 @@ class Utils:
                 # no answer given
                 pass
             questionIndex += 1
+
         if points >= threshold:
-            return points, True
-        return points, False
+            return trunc(points), True
+        return trunc(points), False
