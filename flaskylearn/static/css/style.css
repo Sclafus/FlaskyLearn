@@ -63,6 +63,13 @@ p {
   }
 }
 
+@media screen and (min-width: 576px) {
+  .card-columns {
+    -webkit-column-count: 2;
+            column-count: 2;
+  }
+}
+
 .text-muted {
   color: #737373 !important;
 }

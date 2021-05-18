@@ -64,8 +64,14 @@ p {
 }
 
 .card-link {
-  @media screen and (min-width: 940px){
+  @media screen and (min-width: 940px) {
     margin-left: 90% !important;
+  }
+}
+
+.card-columns {
+  @media screen and (min-width: 576px) {
+    column-count: 2;
   }
 }
 
