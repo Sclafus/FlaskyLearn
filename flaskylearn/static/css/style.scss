@@ -64,7 +64,9 @@ p {
 }
 
 .card-link {
-  margin-left: 90% !important;
+  @media screen and (min-width: 940px){
+    margin-left: 90% !important;
+  }
 }
 
 .text-muted {
