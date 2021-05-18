@@ -159,5 +159,3 @@ def newQuiz():
             jsonify({'message': 'The quiz has been submitted correctly!'}), 200)
         flash("The quiz has been submitted correctly!", category='success')
         return response
-
-
