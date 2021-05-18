@@ -146,12 +146,10 @@ def specificQuiz(courseId: int):
     dbCurr = db.cursor()
 
     # User permission check
-    authorized = False
     try:
         dbCurr.execute(
             "SELECT EXISTS(SELECT timestamp FROM Enrollment WHERE email=? AND id=?)", (session['email'], courseId))
-        if dbCurr.next() != nullTuple:
-            authorized = True
+        authorized = True if dbCurr.next() != nullTuple else False
 
     except KeyError:
         # User is not logged in
@@ -160,9 +158,10 @@ def specificQuiz(courseId: int):
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
     if not authorized:
-        flash("You need to watch all the videos first!", category='warning')
+        flash("You need to enroll and watch all the lessons first!", category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
+    
     # Getting the quiz
     quiz = []
 
