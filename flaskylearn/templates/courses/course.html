@@ -4,7 +4,7 @@
 
 <a class="btn btn-primary margin back" href="{{ url_for('courses.homepage')}}">Back</a>
 
-{% if ((session['enrolled'] == False) and (not session['admin']) )%}
+{% if ((session['enrolled'] == False) and (not session['admin']) and videos)%}
   <form action="#" method="post">
     <button type="submit" class="btn btn-primary padded">Enroll to this course</button>
   </form>
