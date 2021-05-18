@@ -30,7 +30,7 @@ div#cert-ceo-design {
 
 h1 {
   font-family: 'Saira Condensed', sans-serif;
-  margin: 5px 0px;
+  margin: 5px 0;
 }
 
 body {
@@ -45,7 +45,7 @@ body {
 p {
   font-family: 'Arial', sans-serif;
   font-size: 18px;
-  margin: 5px 0px;
+  margin: 5px 0;
 }
 
 html {
