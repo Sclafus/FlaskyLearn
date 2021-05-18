@@ -3,7 +3,7 @@ from Crypto.Hash import SHA3_256
 from datetime import datetime
 import pdfkit
 from math import trunc
-
+from flask import abort, flash, session
 
 class Utils:
 
@@ -89,3 +89,18 @@ class Utils:
         if points >= threshold:
             return trunc(points), True
         return trunc(points), False
+
+    def requireAdminLogin(self):
+        ''' Checks if the user has the sufficient permission to view the page'''
+        dbCurr = self.dbConnect().cursor()
+
+        # permission check
+        if 'email' in session:
+            dbCurr.execute('SELECT EXISTS(SELECT email FROM Contributor WHERE email=? AND password=?)',
+                        (session['email'], session['password']))
+            authorized = True if dbCurr.next() != (0,) else False
+
+        if ((not authorized) or ('email' not in session)):
+            flash("Nice try.", category="danger")
+            return abort(403)
+        return

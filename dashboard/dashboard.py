@@ -14,22 +14,9 @@ dashboard = Blueprint("dashboard", __name__,
 def homepage():
     '''Displays the dashboard only for authorized users (aka contributors)'''
 
-    # checks if the user is authenticated
-    authorized = False
-    if 'email' in session:
-        dbCurr = db.cursor()
-        dbCurr.execute("SELECT EXISTS(SELECT email FROM Contributor WHERE email=?)",
-                       (session['email'], ))
-
-        # let's check if the user is authenticated
-        if dbCurr.next() != nullTuple:
-            authorized = True
-
-    # if not authorized or logged, forbidden
-    if ((not authorized) or ('email' not in session)):
-        return abort(403)
-
-    # AUTHORIZED
+    dbCurr = db.cursor()
+    # Permission check
+    util.requireAdminLogin()
 
     # getting the couses
     courses = []
@@ -103,18 +90,12 @@ def homepage():
 @dashboard.route('/newCourse', methods=['POST', 'GET'])
 def newCourse():
     '''Adds new course to the database'''
-    authorized = False
-    if 'email' in session:
-        dbCurr = db.cursor()
-        dbCurr.execute(
-            'SELECT EXISTS(SELECT email FROM Contributor WHERE email=?)', (session['email'],))
-        if dbCurr.next() != nullTuple:
-            authorized = True
+    dbCurr = db.cursor()
 
-    if ((not authorized) or ('email' not in session)):
-        return abort(403)
+    # permission check
+    util.requireAdminLogin()
 
-    if request.method != 'POST':
+    if request.method == 'GET':
         return render_template('dashboard/newCourse.html')
 
     name = request.form['name']
@@ -129,6 +110,8 @@ def newCourse():
 def newQuiz():
     '''returns the page where you can create a quiz for your course'''
     dbCurr = db.cursor()
+    # permission check
+    util.requireAdminLogin()
 
     # GET Request
     if request.method == 'GET':
@@ -176,3 +159,5 @@ def newQuiz():
             jsonify({'message': 'The quiz has been submitted correctly!'}), 200)
         flash("The quiz has been submitted correctly!", category='success')
         return response
+
+

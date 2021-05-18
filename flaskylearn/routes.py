@@ -51,6 +51,7 @@ def login():
             if passwd == hhpass:
                 # both password and email are valid, logging in
                 session['email'] = hhmail
+                session['password'] = hhpass
                 session['name'] = name
                 session['surname'] = surname
                 if table == 'Contributor':
