@@ -43,7 +43,7 @@
     <ul class="navbar-nav">
       {% if session['email'] %}
         <li class="nav-item">
-          <a href="#" class="nav-link">Hi, <strong>{{ session['name'].capitalize() }}</strong></a>
+          <a href="#" class="nav-link" style="cursor:default">Hi, <strong>{{ session['name'].capitalize() }}</strong></a>
         </li>
         
         {% if session['admin'] %}
