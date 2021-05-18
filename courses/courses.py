@@ -161,7 +161,17 @@ def specificQuiz(courseId: int):
         flash("You need to enroll and watch all the lessons first!", category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
-    
+    # check if user has seen all the lessons
+    dbCurr.execute("SELECT COUNT(*) FROM Composition WHERE courseid=?", (courseId,))
+    lessonNum = dbCurr.next()[0]
+
+    dbCurr.execute("SELECT COUNT(*) FROM (SELECT DISTINCT * FROM Visualization WHERE email=?) as subquery", (session['email'], ))
+    lessonViewed = dbCurr.next()[0]
+
+    if lessonNum > lessonViewed:
+        flash("You need to watch all the lessons first!", category='warning')
+        return redirect(url_for('courses.specificCourse', courseId=courseId))
+
     # Getting the quiz
     quiz = []
 
