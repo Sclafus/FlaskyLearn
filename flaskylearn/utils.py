@@ -5,6 +5,7 @@ import pdfkit
 from math import trunc
 from flask import abort, flash, session
 
+
 class Utils:
 
     def __init__(self, env: dict):
@@ -64,8 +65,7 @@ class Utils:
         pointPerQuestion = 100 / len(quiz)
         points = 0
 
-        questionIndex = 1
-        for question in quiz:
+        for questionIndex, question in enumerate(quiz, start=1):
             wrongAnswers = 0
             rightAnswers = 0
             answers = question['answers']
@@ -84,7 +84,6 @@ class Utils:
             except ZeroDivisionError:
                 # no answer given
                 pass
-            questionIndex += 1
 
         if points >= threshold:
             return trunc(points), True
@@ -97,8 +96,8 @@ class Utils:
         # permission check
         if 'email' in session:
             dbCurr.execute('SELECT EXISTS(SELECT email FROM Contributor WHERE email=? AND password=?)',
-                        (session['email'], session['password']))
-            authorized = True if dbCurr.next() != (0,) else False
+                           (session['email'], session['password']))
+        authorized = True if dbCurr.next() != (0,) else False
 
         if ((not authorized) or ('email' not in session)):
             flash("Nice try.", category="danger")
