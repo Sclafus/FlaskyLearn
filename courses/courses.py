@@ -25,62 +25,52 @@ def specificCourse(courseId: int):
 
     # POST request = a user is trying to enroll in the course
     if request.method == 'POST':
-        try:
+        if 'email' in session:
             dbCurr.execute("INSERT INTO Enrollment VALUES (?, ?, ?)",
                            (session['email'], courseId, util.getTimestamp()))
             flash("You have been enrolled successfully", category='success')
-        except KeyError:
+        else:
             flash("You need to login in order to enroll in this course!",
                   category='danger')
         return redirect(request.url)
 
     # GET request
-    lessons = []
     videos = []
     # getting course name
     dbCurr.execute("SELECT name FROM Course WHERE id=?", (courseId, ))
-    for _courseName in dbCurr:
-        courseName = _courseName[0]
+    if (courseName := dbCurr.next()) == None:
+        flash("The course you are trying to access doesn't exist!", category='danger')
+        return redirect(url_for('courses.homepage'))
 
     # Getting all the lessons for the specified course
     dbCurr.execute(
         "SELECT videoid, lesson, description FROM Composition INNER JOIN Video ON Video.id = Composition.videoid WHERE Composition.courseid = ? ORDER BY lesson", (courseId,))
-
-    for lesson in dbCurr:
-        lessons.append(lesson)
+    lessons = [lesson for lesson in dbCurr]
 
     # checking if the lesson has already been viewed
     for videoid, lesson, description in lessons:
-        flag = False
 
-        try:
+        if 'email' in session:
             dbCurr.execute(
                 "SELECT EXISTS (SELECT id FROM Visualization WHERE id=? AND email=?)", (videoid, session['email']))
-            if dbCurr.next() != nullTuple:
-                flag = True
-        except KeyError:
-            # user not logged in
-            pass
-
-        videos.append((lesson, description, flag))
+            viewed = True if dbCurr.next() != nullTuple else False
+        else:
+            viewed = False
+        videos.append((lesson, description, viewed if viewed else False))
 
     # checking if the user is already enrolled
-    session['enrolled'] = False
-    try:
+    if 'email' in session:
         dbCurr.execute(
             "SELECT EXISTS (SELECT timestamp FROM Enrollment WHERE email=? AND id=?)", (session['email'], courseId))
 
         if dbCurr.next() != nullTuple:
             session['enrolled'] = True
-
-    except KeyError:
-        # user not logged in, enrollment is not applicable
-        pass
-
+    else:
+        session['enrolled'] = False
     # checks if the user has seen all the lessons or not
     notViewedVideos = [video for video in videos if not video[2]]
     quizAvailable = True if not notViewedVideos else False
-    return render_template('courses/course.html', courseName=courseName, videos=videos, courseId=courseId, quizAvailable=quizAvailable)
+    return render_template('courses/course.html', courseName=courseName[0], videos=videos, courseId=courseId, quizAvailable=quizAvailable)
 
 
 @courses.route('/<int:courseId>/lesson<int:lessonId>', methods=['GET', 'POST'])
@@ -93,12 +83,9 @@ def specificLesson(courseId: int, lessonId: int):
         flash("You need to login in order to see this lesson", category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
-    try:
-        if (not session['enrolled'] and not 'admin' in session):
-            flash("You need to enroll in the course to see the lessons",
-                  category='warning')
-            return redirect(url_for('courses.specificCourse', courseId=courseId))
-    except KeyError:
+    if (not session.get('enrolled', default=False) and not 'admin' in session):
+        flash("You need to enroll in the course to see the lessons",
+              category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
     # POST Request
@@ -145,27 +132,28 @@ def specificQuiz(courseId: int):
     '''Quiz for the specified course'''
     dbCurr = db.cursor()
 
-    # User permission check
-    try:
-        dbCurr.execute(
-            "SELECT EXISTS(SELECT timestamp FROM Enrollment WHERE email=? AND id=?)", (session['email'], courseId))
-        authorized = True if dbCurr.next() != nullTuple else False
-
-    except KeyError:
+    if not 'email' in session:
         # User is not logged in
         flash("You need to login in order to access this page",
               category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
+    dbCurr.execute("SELECT EXISTS(SELECT timestamp FROM Enrollment WHERE email=? AND id=?)",
+                   (session['email'], courseId))
+    authorized = True if dbCurr.next() != nullTuple else False
+
     if not authorized:
-        flash("You need to enroll and watch all the lessons first!", category='warning')
+        flash("You need to enroll and watch all the lessons first!",
+              category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
     # check if user has seen all the lessons
-    dbCurr.execute("SELECT COUNT(*) FROM Composition WHERE courseid=?", (courseId,))
+    dbCurr.execute(
+        "SELECT COUNT(*) FROM Composition WHERE courseid=?", (courseId,))
     lessonNum = dbCurr.next()[0]
 
-    dbCurr.execute("SELECT COUNT(*) FROM (SELECT DISTINCT * FROM Visualization WHERE email=?) as subquery", (session['email'], ))
+    dbCurr.execute(
+        "SELECT COUNT(*) FROM (SELECT DISTINCT * FROM Visualization WHERE email=?) as subquery", (session['email'], ))
     lessonViewed = dbCurr.next()[0]
 
     if lessonNum > lessonViewed:
@@ -177,8 +165,7 @@ def specificQuiz(courseId: int):
 
     # Getting course name
     dbCurr.execute("SELECT name FROM Course WHERE id=?", (courseId, ))
-    for _courseName in dbCurr:
-        courseName = _courseName[0]
+    courseName = dbCurr.next()[0]
 
     # getting questions id for the test
     dbCurr.execute(
@@ -228,13 +215,13 @@ def specificQuiz(courseId: int):
 def quizOutcome(courseId: int):
 
     if request.method == 'GET':
-        try:
+        if 'score' in session:
             isPassed = True if session['score'] >= 60 else False
             return render_template('courses/quizOutcome.html', isPassed=isPassed, courseId=courseId)
-        except KeyError:
-            return render_template('courses/quizOutcome.html', courseId=courseId)
+        return render_template('courses/quizOutcome.html', courseId=courseId)
+
     if request.method == 'POST':
-        try:
+        if 'score' in session:
             # getting course description
             dbCurr = db.cursor()
             dbCurr.execute(
@@ -248,7 +235,8 @@ def quizOutcome(courseId: int):
                 'description': dbCurr.next()[0]
             }
 
-            pdf = util.generatePDF(render_template('courses/pdfTemplate.html', data=data))
+            pdf = util.generatePDF(render_template(
+                'courses/pdfTemplate.html', data=data))
 
             response = make_response(pdf)
             response.headers['Content-Type'] = 'application/pdf'
@@ -258,5 +246,4 @@ def quizOutcome(courseId: int):
             session.pop('courseName')
             session.pop('score')
             return response
-        except KeyError:
-            return redirect(url_for('courses.specificCourse', courseId=courseId))
+        return redirect(url_for('courses.specificCourse', courseId=courseId))
