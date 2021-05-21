@@ -205,7 +205,7 @@ document.getElementById('submit').addEventListener('click', () => {
         const answers = Array.from(question.children).filter(ans => ans.classList.contains('answer'));
 
         for (const answer of answers) {
-            let tmpAnswer = { "answer": answer.firstChild.value, "correct": answer.children[2].checked };
+            const tmpAnswer = { "answer": answer.firstChild.value, "correct": answer.children[2].checked };
             tmpQuestion.answers.push(tmpAnswer);
         }
 
