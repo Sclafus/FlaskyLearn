@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session, abort
+from flask import render_template, request, redirect, url_for, flash, session
 from flaskylearn import db, util, app, env, nullTuple
 from datetime import timedelta
 
@@ -24,13 +24,9 @@ def login():
     password = request.form['password']
 
     # handling unchecked "Remember me" option
-    try:
-        stayLogged = request.form['stayLogged']
-        if stayLogged:
+    if 'stayLogged' in request.form:
+        if request.form['stayLogged']:
             app.permanent_session_lifetime = timedelta(days=1000)
-
-    except KeyError:
-        pass
 
     # The database stores hash of hash of both email and password
     hhmail = util.doubleHash(email)
@@ -91,8 +87,9 @@ def register():
     # checks if the email has already been used
     alreadyRegistered = False
     for table in ['Student', 'Contributor']:
-        dbCurr.execute(f"SELECT EXISTS(SELECT email FROM {table} WHERE email=?)", (hhmail, ))
-        if dbCurr.next() != (0,):
+        dbCurr.execute(
+            f"SELECT EXISTS(SELECT email FROM {table} WHERE email=?)", (hhmail, ))
+        if dbCurr.next() != nullTuple:
             alreadyRegistered = True
 
     if alreadyRegistered:
@@ -101,8 +98,8 @@ def register():
         return redirect(request.url)
 
     # Insert new Student in the database
-    dbCurr.execute(
-        "INSERT INTO Student VALUES (?, ?, ?, ?)", (hhmail, name, surname, util.doubleHash(password)))
+    dbCurr.execute("INSERT INTO Student VALUES (?, ?, ?, ?)",
+                   (hhmail, name, surname, util.doubleHash(password)))
     flash("You have been registered. You can now login!", category='success')
     return redirect(url_for('login'))
 
