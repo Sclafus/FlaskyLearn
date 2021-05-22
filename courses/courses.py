@@ -98,11 +98,10 @@ def specificLesson(courseId: int, lessonId: int):
         # getting back the videoid
         dbCurr.execute(
             "SELECT videoid FROM Composition WHERE courseid=? AND lesson=?", (courseId, lessonId))
-        for _videoid in dbCurr:
-            videoId = _videoid[0]
+        videoId = dbCurr.next()[0]
 
         # marking the video as played for a student
-        ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        ts = util.getTimestamp()
         dbCurr.execute("INSERT INTO Visualization (email, id, timestamp) VALUES (?, ?, ?)",
                        (session['email'], videoId, ts))
         flash("The video has been marked as played", category='success')
@@ -111,17 +110,15 @@ def specificLesson(courseId: int, lessonId: int):
     # GET Request
     # getting course name
     dbCurr.execute("SELECT name FROM Course WHERE id=?", (courseId, ))
-    for _courseName in dbCurr:
-        courseName = _courseName[0]
+    courseName = dbCurr.next()[0]
 
     # getting video path
     dbCurr.execute(
         "SELECT path FROM Composition INNER JOIN Video on Composition.videoid = Video.id WHERE lesson = ? AND courseid=?", (lessonId, courseId))
 
-    for _path in dbCurr:
-        path = _path[0].split('/')
-        videoPath = '/'.join(path[-2:])
-        folderPath = path[-3]
+    path = dbCurr.next()[0].split('/')
+    videoPath = '/'.join(path[-2:])
+    folderPath = path[-3]
 
     return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath, courseId=courseId)
 
