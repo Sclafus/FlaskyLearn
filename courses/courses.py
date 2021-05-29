@@ -15,6 +15,7 @@ def homepage():
     dbCurr.execute("SELECT * FROM Course")
     for course in dbCurr:
         courses.append(course)
+    dbCurr.close()
     return render_template('courses/courses.html', context=courses)
 
 
@@ -32,6 +33,7 @@ def specificCourse(courseId: int):
         else:
             flash("You need to login in order to enroll in this course!",
                   category='danger')
+        dbCurr.close()
         return redirect(request.url)
 
     # GET request
@@ -40,6 +42,7 @@ def specificCourse(courseId: int):
     dbCurr.execute("SELECT name FROM Course WHERE id=?", (courseId, ))
     if (courseName := dbCurr.next()) == None:
         flash("The course you are trying to access doesn't exist!", category='danger')
+        dbCurr.close()
         return redirect(url_for('courses.homepage'))
 
     # Getting all the lessons for the specified course
@@ -70,13 +73,13 @@ def specificCourse(courseId: int):
     # checks if the user has seen all the lessons or not
     notViewedVideos = [video for video in videos if not video[2]]
     quizAvailable = True if not notViewedVideos else False
+    dbCurr.close()
     return render_template('courses/course.html', courseName=courseName[0], videos=videos, courseId=courseId, quizAvailable=quizAvailable)
 
 
 @courses.route('/<int:courseId>/lesson<int:lessonId>', methods=['GET', 'POST'])
 def specificLesson(courseId: int, lessonId: int):
     '''Page for a specified lesson, displays video'''
-    dbCurr = db.cursor()
 
     # user is not logged in
     if not 'email' in session:
@@ -88,11 +91,13 @@ def specificLesson(courseId: int, lessonId: int):
               category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
-    # POST Request
+    dbCurr = db.cursor()
+    # POST request
     if request.method == 'POST':
 
         if 'admin' in session:
             flash("Contributors can't mark videos as played", category='warning')
+            dbCurr.close()
             return redirect(request.url)
 
         # getting back the videoid
@@ -105,29 +110,30 @@ def specificLesson(courseId: int, lessonId: int):
         dbCurr.execute("INSERT INTO Visualization (email, id, timestamp) VALUES (?, ?, ?)",
                        (session['email'], videoId, ts))
         flash("The video has been marked as played", category='success')
+        dbCurr.close()
         return redirect(request.url)
+    
+    # GET request
+    if request.method == 'GET':
+        # getting course name
+        dbCurr.execute("SELECT name FROM Course WHERE id=?", (courseId, ))
+        courseName = dbCurr.next()[0]
 
-    # GET Request
-    # getting course name
-    dbCurr.execute("SELECT name FROM Course WHERE id=?", (courseId, ))
-    courseName = dbCurr.next()[0]
+        # getting video path
+        dbCurr.execute(
+            "SELECT path FROM Composition INNER JOIN Video on Composition.videoid = Video.id WHERE lesson = ? AND courseid=?", (lessonId, courseId))
 
-    # getting video path
-    dbCurr.execute(
-        "SELECT path FROM Composition INNER JOIN Video on Composition.videoid = Video.id WHERE lesson = ? AND courseid=?", (lessonId, courseId))
-
-    path = dbCurr.next()[0].split('/')
-    videoPath = '/'.join(path[-2:])
-    folderPath = path[-3]
-
-    return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath, courseId=courseId)
+        path = dbCurr.next()[0].split('/')
+        videoPath = '/'.join(path[-2:])
+        folderPath = path[-3]
+        dbCurr.close()
+        return render_template('courses/lesson.html', courseName=courseName, lessonId=lessonId, videoPath=videoPath, folderPath=folderPath, courseId=courseId)
 
 
 @lru_cache
 @courses.route('/<int:courseId>/quiz', methods=['POST', 'GET'])
 def specificQuiz(courseId: int):
     '''Quiz for the specified course'''
-    dbCurr = db.cursor()
 
     if not 'email' in session:
         # User is not logged in
@@ -135,6 +141,7 @@ def specificQuiz(courseId: int):
               category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
+    dbCurr = db.cursor()
     dbCurr.execute("SELECT EXISTS(SELECT timestamp FROM Enrollment WHERE email=? AND id=?)",
                    (session['email'], courseId))
     authorized = True if dbCurr.next() != nullTuple else False
@@ -142,6 +149,7 @@ def specificQuiz(courseId: int):
     if not authorized:
         flash("You need to enroll and watch all the lessons first!",
               category='warning')
+        dbCurr.close()
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
     # check if user has seen all the lessons
@@ -155,6 +163,7 @@ def specificQuiz(courseId: int):
 
     if lessonNum > lessonViewed:
         flash("You need to watch all the lessons first!", category='warning')
+        dbCurr.close()
         return redirect(url_for('courses.specificCourse', courseId=courseId))
 
     # Getting the quiz
@@ -197,12 +206,15 @@ def specificQuiz(courseId: int):
         session['courseName'] = courseName
         session['courseId'] = courseId
         session['score'] = score
+        dbCurr.close()
         return redirect(url_for('courses.quizOutcome', courseId=courseId))
 
     # GET Request
     if request.method == 'GET':
+        dbCurr.close()
         if quiz:
             return render_template("courses/quiz.html", courseName=courseName, quiz=quiz)
+
         flash("The quiz has not been added to this course yet, come back later!",
               category='warning')
         return redirect(url_for('courses.specificCourse', courseId=courseId))
@@ -242,5 +254,6 @@ def quizOutcome(courseId: int):
             # clearing cookie data
             session.pop('courseName')
             session.pop('score')
+            dbCurr.close()
             return response
         return redirect(url_for('courses.specificCourse', courseId=courseId))
