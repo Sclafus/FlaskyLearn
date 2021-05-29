@@ -97,8 +97,11 @@ class Utils:
         if 'email' in session:
             dbCurr.execute('SELECT EXISTS(SELECT email FROM Contributor WHERE email=? AND password=?)',
                            (session['email'], session['password']))
-        authorized = True if dbCurr.next() != (0,) else False
-
+        try:
+            authorized = True if dbCurr.next() != (0,) else False
+        except mariadb.ProgrammingError:
+            authorized = False
+            
         if ((not authorized) or ('email' not in session)):
             flash("Nice try.", category="danger")
             return abort(403)
