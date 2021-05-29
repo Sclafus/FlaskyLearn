@@ -159,3 +159,16 @@ def newQuiz():
             jsonify({'message': 'The quiz has been submitted correctly!'}), 200)
         flash("The quiz has been submitted correctly!", category='success')
         return response
+
+
+@dashboard.route('/getLessons', methods=['POST'])
+def getCourses():
+    lessons = []
+    dbCurr = db.cursor()
+
+    courseId = request.get_json()['id']
+    dbCurr.execute("SELECT lesson FROM Composition INNER JOIN Course ON Composition.videoid = Course.id WHERE courseid=?", (courseId,))
+    for lessonNum in dbCurr:
+        lessons.append(lessonNum[0])
+
+    return make_response(jsonify({'lessons': lessons}))
