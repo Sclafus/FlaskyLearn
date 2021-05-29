@@ -26,23 +26,28 @@ def homepage():
 
     # GET Request
     if request.method == 'GET':
+        dbCurr.close()
         return render_template('dashboard/dashboard.html', context=courses)
 
     # POST request = new video upload
     # File checks
     if 'video' not in request.files:
+        dbCurr.close()
         return redirect(request.url)
     file = request.files['video']
 
     # handles unselected file
     if file.filename == '':
         flash('No file selected', category='warning')
+
+        dbCurr.close()
         return redirect(request.url)
 
     # handles _ and space char
     if [True for match in file.filename if match in [' ', '_']]:
         flash('Please do not include _ or spaces in your file name!',
               category='warning')
+        dbCurr.close()
         return redirect(request.url)
 
     newFile = False
@@ -84,6 +89,7 @@ def homepage():
         dbCurr.execute("INSERT INTO Composition VALUES (?, ?, ?)",
                        (videoId, courseId, int(request.form['lessonNum'])))
 
+    dbCurr.close()
     return redirect(request.url)
 
 
@@ -103,6 +109,8 @@ def newCourse():
     description = request.form['description']
     dbCurr.execute(
         'INSERT INTO Course (name, duration, description) VALUES (?, ?, ?)', (name, duration, description))
+
+    dbCurr.close()
     return redirect(url_for('dashboard.homepage'))
 
 
@@ -122,6 +130,8 @@ def newQuiz():
             "SELECT id, name FROM Course WHERE id NOT IN (SELECT courseid FROM Test)")
         for courseId, courseName in dbCurr:
             courses[courseId] = courseName
+
+        dbCurr.close()  
         return render_template('dashboard/newQuiz.html', courses=courses)
 
     # POST Request
@@ -158,6 +168,7 @@ def newQuiz():
         response = make_response(
             jsonify({'message': 'The quiz has been submitted correctly!'}), 200)
         flash("The quiz has been submitted correctly!", category='success')
+        dbCurr.close()
         return response
 
 
@@ -171,4 +182,5 @@ def getCourses():
     for lessonNum in dbCurr:
         lessons.append(lessonNum[0])
 
+    dbCurr.close()
     return make_response(jsonify({'lessons': lessons}))
