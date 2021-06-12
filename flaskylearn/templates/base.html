@@ -93,17 +93,7 @@
         I Got It
       </button>
     </div>
-    <script>
-      const cookieNotice = document.getElementById("cookieAccept").parentElement;
-      if (document.cookie == 'cookie=true'){
-        cookieNotice.style = "display: none";
-      } else {
-        cookieNotice.children[0].addEventListener('click', () => {
-          document.cookie = "cookie=true";
-          cookieNotice.style = "display: none";
-        });
-      } 
-    </script>
+    <script src="{{ url_for('static', filename='js/cookieNotice.js') }}"></script>
     {% block content %} {% endblock %}
 </body>
 {% block scripts%}
